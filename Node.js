@@ -127,10 +127,6 @@ Node.prototype.incbackup = async function(backupInfo) {
 }
 
 
-Node.prototype.readOplogTime = async function() {
-
-}
-
 Node.prototype.oplogTimestamp = async function() {
     let db = await this.connect();
     let localdb = await db.db("local")
