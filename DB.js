@@ -13,14 +13,12 @@ DB.prototype.getDb = async function() {
 }
 
 DB.prototype.getUriInfo = function() {
-    let startIdx = this.url.index("mongodb://")
-    let endIdx = this.url.index("@")
-    let ret = /mongodb:\/\/(?:(.*):(.*)@)?([^?]*)(?:\?replSetName\=(.*))?/gi.exec(this.url)
+    let ret = /mongodb:\/\/(?:(.*):(.*)@)?([^?]*)(?:\?replicaSet\=(.*))?/gi.exec(this.url)
     return {
-        username: ret[0],
-        password: ret[1],
-        ips: ret[2].split(','),
-        replSetName: ret[3]
+        username: ret[1],
+        password: ret[2],
+        ips: ret[3].split(','),
+        replSetName: ret[4]
     }
 }
 

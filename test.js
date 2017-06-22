@@ -15,8 +15,8 @@
 //     sdb.close()
 // })
 
-// const ReplicaSetDB = require("./ReplicaSetDB")
-// let sdb = new ReplicaSetDB("mongodb://fhh_super:fhh_super@10.90.34.36:27037,10.90.34.37:27037,10.90.34.38:27037?replicaSet=sharddbshardSvr1")
+const ReplicaSetDB = require("./ReplicaSetDB")
+let sdb = new ReplicaSetDB("mongodb://fhh_super:fhh_super@10.90.34.36:27037,10.90.34.37:27037,10.90.34.38:27037?replicaSet=sharddbshardSvr1")
 
 // sdb.getSecondaryNode().then(function(result) {
 //     console.log(result)
@@ -25,6 +25,16 @@
 //     console.log(err.stack)
 //     sdb.close()
 // })
+
+
+sdb.fullbackup({
+    backup_dir: ".",
+    db: "fhh_test"
+}).then(function(result) {
+    console.log(result);
+}).catch(function(err) {
+    console.log(err.stack);
+})
 
 
 // const MongoClient = require('mongodb').MongoClient
@@ -94,13 +104,13 @@
 // bi.m1();
 
 
-const Timestamp = require('mongodb').Timestamp
-const fs = require("fs")
-let timestamp = new Timestamp(1497964171, 1);
-console.log(timestamp)
-fs.writeFileSync("c:\\sss", "const Timestamp = require('mongodb').Timestamp;module.exports.lastTime = new  Timestamp(" + timestamp.getLowBits() + "," + timestamp.getHighBits() + ")")
+// const Timestamp = require('mongodb').Timestamp
+// const fs = require("fs")
+// let timestamp = new Timestamp(1497964171, 1);
+// console.log(timestamp)
+// fs.writeFileSync("c:\\sss", "const Timestamp = require('mongodb').Timestamp;module.exports.lastTime = new  Timestamp(" + timestamp.getLowBits() + "," + timestamp.getHighBits() + ")")
 
-fs.writeFileSync("c:\\timestamp.json", "[" + timestamp.getLowBits() + "," + timestamp.getHighBits() + "]");
+// fs.writeFileSync("c:\\timestamp.json", "[" + timestamp.getLowBits() + "," + timestamp.getHighBits() + "]");
 
-var re = require("c:\\timestamp.json")
-console.log(re);
+// var re = require("c:\\timestamp.json")
+// console.log(re);

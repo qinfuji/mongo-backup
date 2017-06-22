@@ -30,7 +30,7 @@ ReplicaSetDB.prototype.fullbackup = async function(backupInfo) {
         fs.writeFileSync(backupInfo.backup_dir + "/full/oplog_" + uriInfo.replSetName + ".json", `[${oplogTime.getLowBits()} , ${oplogTime.getHighBits()}]`)
         return Promise.resolve(Result.ok("ok"));
     } catch (err) {
-        let unLockRet = secondaryNode.fsyncUnLock();
+        //let unLockRet = secondaryNode.fsyncUnLock();
         throw new Error(`${this.secondaryNode.url} incbackup fail , ${err.stack}`)
     }
 }
@@ -86,25 +86,30 @@ ReplicaSetDB.prototype.getSecondaryNode = async function() {
         stateMemberMap[member._id] = member;
     })
     let uriInfo = this.getUriInfo();
+    let masterUrl = ''
     configMembers.forEach((member) => {
         let priority = member.priority;
         let hidden = member.hidden;
         let _id = member._id;
         let host = member.host;
+
         if (stateMemberMap[_id] && stateMemberMap[_id].stateStr != "PRIMARY") { //不是关键节点
             let node = null;
-            if (userInfo.username) {
+            if (uriInfo.username) {
                 node = new Node(host, uriInfo.username, uriInfo.password);
             } else {
                 node = new Node(host, null, null);
             }
             if (hidden == true && priority == 0) { //找到一个hidden节点
                 secondaryNode = node;
-                return;
             }
             secondaryNode = node;
         }
+        if (stateMemberMap[_id] && stateMemberMap[_id].stateStr == "PRIMARY") {
+            masterUrl = host;
+        }
     });
+    secondaryNode.setMaster(masterUrl)
     return secondaryNode;
 };
 

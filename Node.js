@@ -12,13 +12,15 @@ const Result = require("./Result");
  * @master 节点的master地址
  * 
  */
-function Node(url, master, username, password) {
+function Node(url, username, password) {
     this.url = url;
-    this.master = master;
     this.username = username
     this.password = password
-}
+};
 
+Node.prototype.setMaster = function(masterUrl) {
+    this.master = masterUrl;
+}
 
 /**
  * 枷锁当前节点
@@ -94,9 +96,10 @@ Node.prototype.fullbackup = async function(backupInfo) {
     cmd_dump = "mongodump " +
         " --host " + this.url +
         this.getAuthParam() +
-        backupInfo.db ? " --db " + backupInfo.db : " " +
+        (backupInfo.db ? " --db " + backupInfo.db : " ") +
         " --out " + backupInfo.backup_dir
-    await dump(cmd_dump);
+    console.log(cmd_dump)
+    await dump(cmd_dump, this);
 }
 
 /**
