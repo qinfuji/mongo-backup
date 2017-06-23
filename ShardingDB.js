@@ -33,21 +33,29 @@ ShardingDB.prototype.fullbackup = async function(backupInfo) {
         let replSets = await this.getReplSetDB(); //得到集群中的所有复制集
         console.log(`ShardingDB getReplSetDB ${this.url} replSets ${replSets.toString()}`)
         let waitBackupReplSet = [];
-        replSets.forEach((replSet) => {
-            let _r = replSet.fullbackup(backupInfo);
-            waitBackupReplSet.push(_r);
-        })
-        let self = this;
-        //await waitBackupReplSet;
-        return Promise.all(waitBackupReplSet).then(() => {
-            let msg = `ShardingDB fullbackup  ${this.url}  finish. ${(new Date().getTime()-startTime)/1000}`;
-            console.log(msg);
-            //return self.stopBalance(); //启动集群负载均衡
-            return Result.ok(msg);
-        }).catch(function(err) {
-            //return self.stopBalance(); //启动集群负载均衡
-            throw new Error(`sharding fullbackup fail , ${this.url} , ${err.stack}`)
-        })
+        // replSets.forEach((replSet) => {
+        //     let _r = replSet.fullbackup(backupInfo);
+        //     waitBackupReplSet.push(_r);
+        // })
+        // let self = this;
+        // //await waitBackupReplSet;
+        // return Promise.all(waitBackupReplSet).then(() => {
+        //     let msg = `ShardingDB fullbackup  ${this.url}  finish. ${(new Date().getTime()-startTime)/1000}`;
+        //     console.log(msg);
+        //     //return self.stopBalance(); //启动集群负载均衡
+        //     return Result.ok(msg);
+        // }).catch((err) => {
+        //     //return self.stopBalance(); //启动集群负载均衡
+        //     throw new Error(`sharding fullbackup fail , ${this.url} , ${err.stack}`)
+        // })
+        if (replSets && replSets.length > 0) {
+            for (var i = 0; i < replSets.length; i++) {
+                await replSets[i].fullbackup(backupInfo);
+            }
+        }
+        let msg = `ShardingDB fullbackup  ${this.url}  finish. ${(new Date().getTime()-startTime)/1000}`;
+        console.log(msg);
+        return Result.ok(msg);
     } catch (err) {
         //await this.startBalance();
         throw new Error(`sharding fullbackup fail, ${this.url} , ${err.stack}`)
