@@ -58,7 +58,7 @@ ShardingDB.prototype.fullbackup = async function(backupInfo) {
         return Result.ok(msg);
     } catch (err) {
         //await this.startBalance();
-        throw new Error(`sharding fullbackup fail, ${this.url} , ${err.stack}`)
+        throw new Error(`sharding fullbackup fail, ${this.url} , ${err}`)
     }
 }
 
