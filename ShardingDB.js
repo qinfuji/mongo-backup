@@ -39,7 +39,7 @@ ShardingDB.prototype.fullbackup = async function(backupInfo) {
         })
         let self = this;
         //await waitBackupReplSet;
-        return Promise.all(waitBackupReplSet).then(function() {
+        return Promise.all(waitBackupReplSet).then(() => {
             let msg = `ShardingDB fullbackup  ${this.url}  finish. ${(new Date().getTime()-startTime)/1000}`;
             console.log(msg);
             //return self.stopBalance(); //启动集群负载均衡
@@ -70,7 +70,7 @@ ShardingDB.prototype.incbackup = async function(backupInfo) {
         })
         let self = this;
         //await waitBackupReplSet;
-        return Promise.all(waitBackupReplSet).then(function() {
+        return Promise.all(waitBackupReplSet).then(() => {
             let msg = `ShardingDB incbackup  ${this.url}  finish. ${(new Date().getTime()-startTime)/1000}`;
             console.log(msg);
             //return self.stopBalance(); //启动集群负载均衡
