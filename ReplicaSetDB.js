@@ -16,6 +16,7 @@ ReplicaSetDB.prototype.fullbackup = async function(backupInfo) {
 
     let db = await this.getDb();
     let secondaryNode = await this.getSecondaryNode()
+    console.log(`ReplicaSetDB ${this.url} back node: ${secondaryNode}`)
     try {
         let uriInfo = this.getUriInfo();
 
@@ -30,10 +31,11 @@ ReplicaSetDB.prototype.fullbackup = async function(backupInfo) {
         //将最后的日志时间写入备份根目录
         let statusFile = backupInfo.backup_dir + "/full/oplog_" + uriInfo.replSetName + ".json";
         fs.writeFileSync(statusFile, `[${oplogTime.getLowBits()} , ${oplogTime.getHighBits()}]`);
+        console.log(`finish ReplicaSetDB ${this.url} ok`);
         return Promise.resolve(Result.ok("ok"));
     } catch (err) {
         //let unLockRet = secondaryNode.fsyncUnLock();
-        console.log(err.stack)
+        console.log(`finish ReplicaSetDB ${this.url} ${err.stack}`)
         throw new Error(`${this.secondaryNode.url} incbackup fail , ${err.stack}`)
     }
 }
