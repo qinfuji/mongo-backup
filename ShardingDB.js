@@ -36,6 +36,8 @@ ShardingDB.prototype.fullbackup = async function(backupInfo) {
         })
         let self = this;
         await waitBackupReplSet;
+        console.log(`fullbackup  ${this.url}  finish`);
+        return Result.ok(`fullbackup  ${this.url}  finish`);
         //return self.stopBalance(); //启动集群负载均衡
     } catch (err) {
         //await this.startBalance();
@@ -48,6 +50,7 @@ ShardingDB.prototype.fullbackup = async function(backupInfo) {
  */
 ShardingDB.prototype.incbackup = async function(backupInfo) {
     try {
+        console.log(`start incbackup ${this.url} ...`);
         //await this.stopBalance(); //停止集群负载均衡
         let replSets = await this.getReplSetDB(); //得到集群中的所有复制集
         let waitBackupReplSet = [];
@@ -57,6 +60,10 @@ ShardingDB.prototype.incbackup = async function(backupInfo) {
         })
         let self = this;
         await waitBackupReplSet;
+        console.log(`incbackup finish : ${this.url}`)
+        console.log(`close db : ${this.url}`)
+        this.close();
+        return Result.ok(`incbackup finish : ${this.url}`);
         //return self.stopBalance(); //启动集群负载均衡
     } catch (err) {
         //await this.startBalance();

@@ -30,9 +30,9 @@ let sdb = new ShardingDB("mongodb://10.90.13.157:27017,10.90.13.158:27017")
 sdb.fullbackup({
     backup_dir: __dirname
 }).then(function(result) {
-    console.log(result)
+    console.log("fullbackup finish ", result)
 }).catch(function(err) {
-    console.log(err.stack)
+    console.log("fullbackup error ", err.stack)
 })
 
 // sdb.getReplSetDB().then((result) => {

@@ -91,14 +91,13 @@ Node.prototype.fsyncUnLock = async function() {
 Node.prototype.fullbackup = async function(backupInfo) {
 
     if (!backupInfo) {
-        return Promise.reject(Result.fail(`fullbackup ${this.url} 备份选项必须设置`));
+        throw new Error(`fullbackup ${this.url} 备份选项必须设置`);
     }
     cmd_dump = "mongodump " +
         " --host " + this.url +
         this.getAuthParam() +
         (backupInfo.db ? " --db " + backupInfo.db : " ") +
         " --out " + backupInfo.backup_dir
-    console.log(cmd_dump)
     await dump(cmd_dump, this);
 }
 
@@ -111,11 +110,11 @@ Node.prototype.fullbackup = async function(backupInfo) {
 Node.prototype.incbackup = async function(backupInfo) {
     //从备份目录中获取上次备份信息
     if (!backupInfo) {
-        return Promise.reject(Result.fail(`${this.url} 备份选项必须设置`));
+        throw new Error(`incbackup ${this.url} 备份选项必须设置`);
     }
     let timestamp = backupInfo.lastTimestamp;
     if (!timestamp) {
-        return Promise.reject(Result.fail(`${this.url} 没有增量的时间点`));
+        throw new Error(`incbackup ${this.url} 没有增量的时间点`);
     }
     let ns = ""
     if (backupInfo.db) {
@@ -136,6 +135,7 @@ Node.prototype.oplogTimestamp = async function() {
     let oplog = await localdb.collection("oplog.rs");
     let lastLog = await oplog.find().sort({ $natural: -1 }).limit(1).toArray();
     let timestamp = lastLog[0].ts; //最后的时间
+    db.close();
     return timestamp;
 }
 
@@ -155,7 +155,7 @@ async function dump(cmd, db) {
     console.log(cmd)
     return new Promise((resolve, reject) => {
         exec(cmd, (error, stdout, stderr) => {
-            console.log(` stdout: ${stdout}`);
+            console.log(`stdout: ${stdout}`);
             console.log(`stderr: ${stderr}`);
             if (error) {
                 reject(Result.fail(`dump ${db.url} error: ${ error }`))

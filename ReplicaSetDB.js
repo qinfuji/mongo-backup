@@ -19,10 +19,10 @@ ReplicaSetDB.prototype.fullbackup = async function(backupInfo) {
     console.log(`ReplicaSetDB ${this.url} back node: ${secondaryNode}`)
     try {
         let uriInfo = this.getUriInfo();
-
         //let lockRet = await secondaryNode.fsyncLock(); //加入锁
         let oplogTime = await secondaryNode.oplogTimestamp() //得到最后的oplog时间
         let backupDir = backupInfo.backup_dir + "/full" + "/" + uriInfo.replSetName; //全量备份目录
+        console.log(`start backup  ReplicaSetDB ${this.url}   to  ${backupDir} ...`);
         let backupResult = await secondaryNode.fullbackup({
             backup_dir: backupDir,
             db: backupInfo.db //需要备份的数据库
@@ -32,7 +32,8 @@ ReplicaSetDB.prototype.fullbackup = async function(backupInfo) {
         let statusFile = backupInfo.backup_dir + "/full/oplog_" + uriInfo.replSetName + ".json";
         fs.writeFileSync(statusFile, `[${oplogTime.getLowBits()} , ${oplogTime.getHighBits()}]`);
         console.log(`finish ReplicaSetDB ${this.url} ok`);
-        return Promise.resolve(Result.ok("ok"));
+        this.close();
+        return Result.ok("ok");
     } catch (err) {
         //let unLockRet = secondaryNode.fsyncUnLock();
         console.log(`finish ReplicaSetDB ${this.url} ${err.stack}`)
