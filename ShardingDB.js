@@ -33,7 +33,7 @@ ShardingDB.prototype.fullbackup = async function(backupInfo) {
         console.log(`ShardingDB getReplSetDB ${this.url} replSets ${replSets}`)
         let waitBackupReplSet = [];
         replSets.forEach((replSet) => {
-            let _r = await replSet.fullbackup(backupInfo);
+            let _r = replSet.fullbackup(backupInfo);
             console.log(_r);
             waitBackupReplSet.push(_r);
         })
