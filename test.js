@@ -15,8 +15,8 @@
 //     sdb.close()
 // })
 
-const ReplicaSetDB = require("./ReplicaSetDB")
-let sdb = new ReplicaSetDB("mongodb://fhh_super:fhh_super@10.90.34.36:27037,10.90.34.37:27037,10.90.34.38:27037?replicaSet=sharddbshardSvr1")
+const ShardingDB = require("./ShardingDB")
+let sdb = new ShardingDB("mongodb://10.90.13.157:27017,10.90.13.158:27017")
 
 // sdb.getSecondaryNode().then(function(result) {
 //     console.log(result)
@@ -28,13 +28,29 @@ let sdb = new ReplicaSetDB("mongodb://fhh_super:fhh_super@10.90.34.36:27037,10.9
 
 
 sdb.fullbackup({
-    backup_dir: ".",
-    db: "fhh_test"
+    backup_dir: __dirname
 }).then(function(result) {
-    console.log(result);
+    console.log(result)
 }).catch(function(err) {
-    console.log(err.stack);
+    console.log(err.stack)
 })
+
+// sdb.getReplSetDB().then((result) => {
+//     if (result && result.length) {
+//         result.forEach(function(db) {
+//             // db.getSecondaryNode().then(function(result) {
+//             //     console.log(result)
+//             // }).catch(function(err) {
+//             //     console.log(err);
+//             // })
+//             db.fullbackup({
+//                 backup_dir: "."
+//             })
+//         })
+//     }
+// }).catch(function(err) {
+//     console.log(err)
+// })
 
 
 // const MongoClient = require('mongodb').MongoClient

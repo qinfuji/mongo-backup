@@ -1,6 +1,7 @@
 var Node = require("./node")
 const DB = require("./DB")
 var fs = require('fs');
+var Result = require("./Result")
 const Timestamp = require('mongodb').Timestamp;
 
 function ReplicaSetDB(url) {
@@ -17,20 +18,22 @@ ReplicaSetDB.prototype.fullbackup = async function(backupInfo) {
     let secondaryNode = await this.getSecondaryNode()
     try {
         let uriInfo = this.getUriInfo();
-        let lockRet = await secondaryNode.fsyncLock(); //加入锁
+
+        //let lockRet = await secondaryNode.fsyncLock(); //加入锁
         let oplogTime = await secondaryNode.oplogTimestamp() //得到最后的oplog时间
         let backupDir = backupInfo.backup_dir + "/full" + "/" + uriInfo.replSetName; //全量备份目录
-
         let backupResult = await secondaryNode.fullbackup({
             backup_dir: backupDir,
             db: backupInfo.db //需要备份的数据库
         });
-        let unLockRet = await secondaryNode.fsyncUnLock();
+        //let unLockRet = await secondaryNode.fsyncUnLock();
         //将最后的日志时间写入备份根目录
-        fs.writeFileSync(backupInfo.backup_dir + "/full/oplog_" + uriInfo.replSetName + ".json", `[${oplogTime.getLowBits()} , ${oplogTime.getHighBits()}]`)
+        let statusFile = backupInfo.backup_dir + "/full/oplog_" + uriInfo.replSetName + ".json";
+        fs.writeFileSync(statusFile, `[${oplogTime.getLowBits()} , ${oplogTime.getHighBits()}]`);
         return Promise.resolve(Result.ok("ok"));
     } catch (err) {
         //let unLockRet = secondaryNode.fsyncUnLock();
+        console.log(err.stack)
         throw new Error(`${this.secondaryNode.url} incbackup fail , ${err.stack}`)
     }
 }
@@ -45,7 +48,7 @@ ReplicaSetDB.prototype.incbackup = async function(backupInfo) {
         //读取上次增量被封的log的时间
         //如果没有增量信息，则抛出错误
         let lastTime = require(backupInfo.backup_dir + "/full/oplog_" + uriInfo.replSetName + ".json")
-        let lockRet = await secondaryNode.fsyncLock(); //枷锁数据
+            //let lockRet = await secondaryNode.fsyncLock(); //枷锁数据
         let currentOplogTime = await secondaryNode.oplogTimestamp(); //当前数据节点的最后log时间
         if (!lastTime) {
             return Result.fail("没有oplog时间")
@@ -56,8 +59,8 @@ ReplicaSetDB.prototype.incbackup = async function(backupInfo) {
         }
         console.log("inc backup info ", backupInfo);
         console.log("inc backup start ... ");
-        let backupResult = await secondaryNode.incbackup(backupInfo);
-        let unLockRet = await secondaryNode.fsyncUnLock();
+        //let backupResult = await secondaryNode.incbackup(backupInfo);
+        //let unLockRet = await secondaryNode.fsyncUnLock();
         //保存当前状态到文件
         console.log("incbackup finish");
         return Result.ok("incbackup finish")

@@ -26,7 +26,7 @@ ShardingDB.prototype.startBalance = async function() {
  */
 ShardingDB.prototype.fullbackup = async function(backupInfo) {
     try {
-        await this.stopBalance(); //停止集群负载均衡
+        //await this.stopBalance(); //停止集群负载均衡
         let replSets = await this.getReplSetDB(); //得到集群中的所有复制集
         let waitBackupReplSet = [];
         replSets.forEach(function(replSet) {
@@ -34,10 +34,10 @@ ShardingDB.prototype.fullbackup = async function(backupInfo) {
             waitBackupReplSet.push(_r);
         })
         let self = this;
-        await waitBackupReplSet
-        return self.stopBalance(); //启动集群负载均衡
+        await waitBackupReplSet;
+        //return self.stopBalance(); //启动集群负载均衡
     } catch (err) {
-        await this.startBalance();
+        //await this.startBalance();
         throw new Error("sharding fullbackup fail", err.stack)
     }
 }
@@ -47,7 +47,7 @@ ShardingDB.prototype.fullbackup = async function(backupInfo) {
  */
 ShardingDB.prototype.incbackup = async function(backupInfo) {
     try {
-        await this.stopBalance(); //停止集群负载均衡
+        //await this.stopBalance(); //停止集群负载均衡
         let replSets = await this.getReplSetDB(); //得到集群中的所有复制集
         let waitBackupReplSet = [];
         replSets.forEach(function(replSet) {
@@ -56,9 +56,9 @@ ShardingDB.prototype.incbackup = async function(backupInfo) {
         })
         let self = this;
         await waitBackupReplSet;
-        return self.stopBalance(); //启动集群负载均衡
+        //return self.stopBalance(); //启动集群负载均衡
     } catch (err) {
-        await this.startBalance();
+        //await this.startBalance();
         throw new Error(err);
     }
 }
@@ -89,12 +89,11 @@ ShardingDB.prototype.getReplSetDB = async function() {
         if (uriInfo.username) {
             url += uriInfo.username + ":" + uriInfo.password + "@"
         }
-        url += +ips[1] + "?replicaSet=" + ips[0];
-        console.log("clust shard :" + url);
+        url += ips[1] + "?replicaSet=" + ips[0];
         let replSetDB = new ReplicaSetDB(url);
         replicaSets.push(replSetDB);
-        return replicaSets;
     })
+    return replicaSets
 }
 
 async function setBanlance(db, state) {
