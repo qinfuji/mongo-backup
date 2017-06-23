@@ -161,11 +161,7 @@ async function dump(cmd, db) {
                 reject(Result.fail(`dump ${db.url} error: ${ error }`))
                 return;
             }
-            if (stdout) {
-                resolve(Result.ok(`dump ${db.url} ok`))
-            } else {
-                reject(Result.fail(`dump ${db.url} fail, $`))
-            }
+            resolve(Result.ok(`dump ${db.url} ok`))
         })
     })
 }

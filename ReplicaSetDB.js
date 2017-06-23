@@ -32,12 +32,14 @@ ReplicaSetDB.prototype.fullbackup = async function(backupInfo) {
         let statusFile = backupInfo.backup_dir + "/full/oplog_" + uriInfo.replSetName + ".json";
         fs.writeFileSync(statusFile, `[${oplogTime.getLowBits()} , ${oplogTime.getHighBits()}]`);
         console.log(`finish ReplicaSetDB ${this.url} ok`);
-        this.close();
+        db.close();
         return Result.ok("ok");
     } catch (err) {
         //let unLockRet = secondaryNode.fsyncUnLock();
-        console.log(`finish ReplicaSetDB ${this.url} ${err.stack}`)
-        throw new Error(`${this.secondaryNode.url} incbackup fail , ${err.stack}`)
+        let msg = `finish ReplicaSetDB ${this.url} ${err.stack}`;
+        console.log(msg)
+        db.close();
+        throw new Error(msg)
     }
 }
 
@@ -66,11 +68,14 @@ ReplicaSetDB.prototype.incbackup = async function(backupInfo) {
         //let unLockRet = await secondaryNode.fsyncUnLock();
         //保存当前状态到文件
         console.log("incbackup finish");
+        db.close();
         return Result.ok("incbackup finish")
     } catch (err) {
-        console.log(`${this.secondaryNode.url} incbackup fail , ${err.stack}`);
-        let unLockRet = secondaryNode.fsyncUnLock();
-        throw new Error(`ReplSet incbackup fail ${err.stack}`)
+        let msg = `ReplicaSetDB  incbackup fail ${this.url} , ${err.stack}`;
+        console.log(msg);
+        //let unLockRet = secondaryNode.fsyncUnLock();
+        db.close();
+        throw new Error(msg)
     }
 }
 
@@ -80,50 +85,50 @@ ReplicaSetDB.prototype.incbackup = async function(backupInfo) {
 ReplicaSetDB.prototype.getSecondaryNode = async function() {
 
     let db = await this.getDb();
-    //得到复制集的信息，能够找出hidden节点
-    let replSetConfig = await db.command({ replSetGetConfig: 1 })
-    let configMembers = replSetConfig.config.members;
-    let replSetStatus = await db.command({ replSetGetStatus: 1 });
-    let stateMember = replSetStatus.members;
+    try {
+        //得到复制集的信息，能够找出hidden节点
+        let replSetConfig = await db.command({ replSetGetConfig: 1 })
+        let configMembers = replSetConfig.config.members;
+        let replSetStatus = await db.command({ replSetGetStatus: 1 });
+        let stateMember = replSetStatus.members;
 
-    let secondaryNode = null;
-    let stateMemberMap = {};
-    stateMember.forEach(function(member) {
-        stateMemberMap[member._id] = member;
-    })
-    let uriInfo = this.getUriInfo();
-    let masterUrl = ''
-    configMembers.forEach((member) => {
-        let priority = member.priority;
-        let hidden = member.hidden;
-        let _id = member._id;
-        let host = member.host;
-
-        if (stateMemberMap[_id] && stateMemberMap[_id].stateStr != "PRIMARY") { //不是关键节点
-            let node = null;
-            if (uriInfo.username) {
-                node = new Node(host, uriInfo.username, uriInfo.password);
-            } else {
-                node = new Node(host, null, null);
-            }
-            if (hidden == true && priority == 0) { //找到一个hidden节点
+        let secondaryNode = null;
+        let stateMemberMap = {};
+        stateMember.forEach(function(member) {
+            stateMemberMap[member._id] = member;
+        })
+        let uriInfo = this.getUriInfo();
+        let masterUrl = ''
+        configMembers.forEach((member) => {
+            let priority = member.priority;
+            let hidden = member.hidden;
+            let _id = member._id;
+            let host = member.host;
+            if (stateMemberMap[_id] && stateMemberMap[_id].stateStr != "PRIMARY") { //不是关键节点
+                let node = null;
+                if (uriInfo.username) {
+                    node = new Node(host, uriInfo.username, uriInfo.password);
+                } else {
+                    node = new Node(host, null, null);
+                }
+                if (hidden == true && priority == 0) { //找到一个hidden节点
+                    secondaryNode = node;
+                }
                 secondaryNode = node;
             }
-            secondaryNode = node;
-        }
-        if (stateMemberMap[_id] && stateMemberMap[_id].stateStr == "PRIMARY") {
-            masterUrl = host;
-        }
-    });
-    secondaryNode.setMaster(masterUrl)
-    return secondaryNode;
-};
-
-ReplicaSetDB.prototype.close = async function() {
-    let db = await this.getDb();
-    if (db) {
-        db.close()
+            if (stateMemberMap[_id] && stateMemberMap[_id].stateStr == "PRIMARY") {
+                masterUrl = host;
+            }
+        });
+        secondaryNode.setMaster(masterUrl)
+        db.close();
+        return secondaryNode;
+    } catch (err) {
+        let msg = `ReplicaSetDB ${this.url} getSecondaryNode error . ${err.stack}`;
+        console.log(msg);
+        db.close();
+        throw new Error(msg)
     }
-}
+};
 
 module.exports = ReplicaSetDB;

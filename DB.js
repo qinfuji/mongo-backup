@@ -6,10 +6,7 @@ function DB(url) {
 
 
 DB.prototype.getDb = async function() {
-    if (!this.db) {
-        this.db = await MongoClient.connect(this.url);
-    }
-    return this.db;
+    return await MongoClient.connect(this.url);
 }
 
 DB.prototype.getUriInfo = function() {

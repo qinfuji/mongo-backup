@@ -13,12 +13,14 @@ ShardingDB.prototype = Object.create(DB.prototype);
 
 ShardingDB.prototype.stopBalance = async function() {
     let db = await this.getDb();
-    return setBanlance(db, true);
+    setBanlance(db, true);
+    db.close();
 }
 
 ShardingDB.prototype.startBalance = async function() {
     let db = await this.gteDb();
-    return setBanlance(db, false);
+    setBanlance(db, false);
+    db.close();
 }
 
 /**
@@ -67,17 +69,12 @@ ShardingDB.prototype.incbackup = async function(backupInfo) {
         //return self.stopBalance(); //启动集群负载均衡
     } catch (err) {
         //await this.startBalance();
-        throw new Error(err);
+        let msg = `ShardingDB incbackup error . ${this.url} , ${err.stack}`
+        console.log(msg)
+        throw new Error(msg);
     }
 }
 
-
-ShardingDB.prototype.close = async function() {
-    let db = await this.getDb();
-    if (db) {
-        db.close();
-    }
-}
 
 /**
  * 得到复制集
@@ -85,23 +82,31 @@ ShardingDB.prototype.close = async function() {
 ShardingDB.prototype.getReplSetDB = async function() {
 
     let db = await this.getDb();
-    let configDB = db.db("config")
-    let shardolleciton = await configDB.collection("shards");
-    let shardInfos = await shardolleciton.find({}).toArray();
-    let replicaSets = [];
-    let uriInfo = this.getUriInfo();
-    shardInfos.forEach((shardInfo) => {
-        let shardhost = shardInfo.host;
-        let ips = shardhost.split("/");
-        let url = "mongodb://";
-        if (uriInfo.username) {
-            url += uriInfo.username + ":" + uriInfo.password + "@"
-        }
-        url += ips[1] + "?replicaSet=" + ips[0];
-        let replSetDB = new ReplicaSetDB(url);
-        replicaSets.push(replSetDB);
-    })
-    return replicaSets
+    try {
+        let configDB = db.db("config")
+        let shardolleciton = await configDB.collection("shards");
+        let shardInfos = await shardolleciton.find({}).toArray();
+        let replicaSets = [];
+        let uriInfo = this.getUriInfo();
+        shardInfos.forEach((shardInfo) => {
+            let shardhost = shardInfo.host;
+            let ips = shardhost.split("/");
+            let url = "mongodb://";
+            if (uriInfo.username) {
+                url += uriInfo.username + ":" + uriInfo.password + "@"
+            }
+            url += ips[1] + "?replicaSet=" + ips[0];
+            let replSetDB = new ReplicaSetDB(url);
+            replicaSets.push(replSetDB);
+        })
+        db.close();
+        return replicaSets
+    } catch (err) {
+        let msg = `ShardingDB ${this.url} getReplSetDB error . ${err.stack}`;
+        console.log(msg)
+        db.close();
+        throw new Error(msg)
+    }
 }
 
 async function setBanlance(db, state) {
