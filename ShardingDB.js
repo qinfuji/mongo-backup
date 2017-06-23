@@ -30,11 +30,10 @@ ShardingDB.prototype.fullbackup = async function(backupInfo) {
     try {
         //await this.stopBalance(); //停止集群负载均衡
         let replSets = await this.getReplSetDB(); //得到集群中的所有复制集
-        console.log(`ShardingDB getReplSetDB ${this.url} replSets ${replSets}`)
+        console.log(`ShardingDB getReplSetDB ${this.url} replSets ${replSets.toString()}`)
         let waitBackupReplSet = [];
         replSets.forEach((replSet) => {
             let _r = replSet.fullbackup(backupInfo);
-            console.log(_r);
             waitBackupReplSet.push(_r);
         })
         let self = this;

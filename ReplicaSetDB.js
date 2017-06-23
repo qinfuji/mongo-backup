@@ -16,7 +16,7 @@ ReplicaSetDB.prototype.fullbackup = async function(backupInfo) {
 
     let db = await this.getDb();
     let secondaryNode = await this.getSecondaryNode()
-    console.log(`ReplicaSetDB ${this.url} back node: ${secondaryNode}`)
+    console.log(`ReplicaSetDB fullbackup ${this.url} : ${secondaryNode.toString()}`)
     try {
         let uriInfo = this.getUriInfo();
         //let lockRet = await secondaryNode.fsyncLock(); //加入锁
