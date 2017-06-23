@@ -37,7 +37,7 @@ ShardingDB.prototype.fullbackup = async function(backupInfo) {
             waitBackupReplSet.push(_r);
         })
         let self = this;
-        await waitBackupReplSet;
+        //await waitBackupReplSet;
         return Promise.all(waitBackupReplSet).then(function() {
             let msg = `fullbackup  ${this.url}  finish`;
             console.log(msg);
