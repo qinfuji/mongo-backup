@@ -39,10 +39,16 @@ ShardingDB.prototype.fullbackup = async function(backupInfo) {
         })
         let self = this;
         await waitBackupReplSet;
-        let msg = `fullbackup  ${this.url}  finish`;
-        console.log(msg);
-        return Result.ok(msg);
-        //return self.stopBalance(); //启动集群负载均衡
+        return Promise.all(waitBackupReplSet).then(function() {
+            let msg = `fullbackup  ${this.url}  finish`;
+            console.log(msg);
+            //return self.stopBalance(); //启动集群负载均衡
+            return Result.ok(msg);
+        }).catch(function(err) {
+            //return self.stopBalance(); //启动集群负载均衡
+            throw new Error("sharding fullbackup fail", err.stack)
+        })
+
     } catch (err) {
         //await this.startBalance();
         throw new Error("sharding fullbackup fail", err.stack)
