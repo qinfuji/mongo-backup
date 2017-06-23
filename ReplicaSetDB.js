@@ -1,4 +1,4 @@
-var Node = require("./node")
+var Node = require("./Node")
 const DB = require("./DB")
 var fs = require('fs');
 var Result = require("./Result")
