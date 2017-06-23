@@ -31,12 +31,12 @@ ReplicaSetDB.prototype.fullbackup = async function(backupInfo) {
         //将最后的日志时间写入备份根目录
         let statusFile = backupInfo.backup_dir + "/full/oplog_" + uriInfo.replSetName + ".json";
         fs.writeFileSync(statusFile, `[${oplogTime.getLowBits()} , ${oplogTime.getHighBits()}]`);
-        console.log(`finish ReplicaSetDB ${this.url} ok`);
+        console.log(`ReplicaSetDB fullbackup finish : ${this.url} ok`);
         db.close();
         return Result.ok("ok");
     } catch (err) {
         //let unLockRet = secondaryNode.fsyncUnLock();
-        let msg = `finish ReplicaSetDB ${this.url} ${err.stack}`;
+        let msg = `ReplicaSetDB fullbackup error ,  ${this.url} ${err.stack}`;
         console.log(msg)
         db.close();
         throw new Error(msg)
@@ -63,15 +63,15 @@ ReplicaSetDB.prototype.incbackup = async function(backupInfo) {
             lastTimestamp: new Timestamp(lastTime[0], lastTime[1]) //最后读取的时间
         }
         console.log("inc backup info ", backupInfo);
-        console.log("inc backup start ... ");
         //let backupResult = await secondaryNode.incbackup(backupInfo);
         //let unLockRet = await secondaryNode.fsyncUnLock();
         //保存当前状态到文件
-        console.log("incbackup finish");
+        let msg = `ReplicaSetDB incbackup finish , ${this.url}`;
+        console.log(msg);
         db.close();
-        return Result.ok("incbackup finish")
+        return Result.ok(msg)
     } catch (err) {
-        let msg = `ReplicaSetDB  incbackup fail ${this.url} , ${err.stack}`;
+        let msg = `ReplicaSetDB incbackup fail ${this.url} , ${err.stack}`;
         console.log(msg);
         //let unLockRet = secondaryNode.fsyncUnLock();
         db.close();
