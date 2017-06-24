@@ -65,12 +65,12 @@ ReplicaSetDB.prototype.incbackup = async function(backupInfo) {
         if (!lastTime) {
             return Result.fail("没有oplog时间")
         }
-        let backupInfo = {
+        let _backupInfo = {
             backup_dir: backupInfo.backup_dir + "/inc-" + currentOplogTime.getLowBits() + '_' + currentOplogTime.getHighBits(), //增量备份目录,时间是读取的最后时间
             lastTimestamp: new Timestamp(lastTime[0], lastTime[1]) //最后读取的时间
         }
-        console.log("inc backup info ", backupInfo);
-        let backupResult = await secondaryNode.incbackup(backupInfo);
+        console.log("inc backup info ", _backupInfo);
+        let backupResult = await secondaryNode.incbackup(_backupInfo);
         //let unLockRet = await secondaryNode.fsyncUnLock();
         //保存当前状态到文件
         let msg = `ReplicaSetDB incbackup finish , ${this.url} , ${(new Date().getTime()-startTime)/1000}`;
