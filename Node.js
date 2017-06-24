@@ -120,7 +120,7 @@ Node.prototype.incbackup = async function(backupInfo) {
     if (backupInfo.db) {
         ns += `, "ns": /${backupInfo.db}/`
     }
-    let query = `'{ "ts": { "$gte": Timestamp(${timestamp.getLowBits()}, ${timestamp.getHighBits()})${ns}}}'`
+    let query = `'{ "ts": { "$gte": Timestamp( ${timestamp.getHighBits()},${timestamp.getLowBits()})${ns}}}'`
     let cmd_dump = "mongodump" +
         this.getAuthParam() +
         " --host " + this.url + " --out " + backupInfo.backup_dir +
