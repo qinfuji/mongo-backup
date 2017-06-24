@@ -57,7 +57,10 @@ ReplicaSetDB.prototype.incbackup = async function(backupInfo) {
         //读取上次增量被封的log的时间
         //如果没有增量信息，则抛出错误
         let lastTime = require(backupInfo.backup_dir + "/full/oplog_" + uriInfo.replSetName + ".json")
-            //let lockRet = await secondaryNode.fsyncLock(); //枷锁数据
+        if (!lastTime) {
+            throw new Error("no oplog position")
+        }
+        //let lockRet = await secondaryNode.fsyncLock(); //枷锁数据
         let currentOplogTime = await secondaryNode.oplogTimestamp(); //当前数据节点的最后log时间
         if (!lastTime) {
             return Result.fail("没有oplog时间")
@@ -67,7 +70,7 @@ ReplicaSetDB.prototype.incbackup = async function(backupInfo) {
             lastTimestamp: new Timestamp(lastTime[0], lastTime[1]) //最后读取的时间
         }
         console.log("inc backup info ", backupInfo);
-        //let backupResult = await secondaryNode.incbackup(backupInfo);
+        let backupResult = await secondaryNode.incbackup(backupInfo);
         //let unLockRet = await secondaryNode.fsyncUnLock();
         //保存当前状态到文件
         let msg = `ReplicaSetDB incbackup finish , ${this.url} , ${(new Date().getTime()-startTime)/1000}`;
