@@ -73,6 +73,9 @@ ReplicaSetDB.prototype.incbackup = async function(backupInfo) {
         let backupResult = await secondaryNode.incbackup(_backupInfo);
         //let unLockRet = await secondaryNode.fsyncUnLock();
         //保存当前状态到文件
+        let statusFile = backupInfo.backup_dir + "/full/oplog_" + uriInfo.replSetName + ".json";
+        console.log(`ReplicaSetDB write current oplog status : ${this.url}  ${currentOplogTime}..`);
+        fs.writeFileSync(statusFile, `[${currentOplogTime.getLowBits()} , ${currentOplogTime.getHighBits()}]`);
         let msg = `ReplicaSetDB incbackup finish , ${this.url} , ${(new Date().getTime()-startTime)/1000}`;
         console.log(msg);
         db.close();
