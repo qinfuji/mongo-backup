@@ -30,9 +30,10 @@ ReplicaSetDB.prototype.fullbackup = async function(backupInfo) {
         });
         //let unLockRet = await secondaryNode.fsyncUnLock();
         //将最后的日志时间写入备份根目录
-        let statusFile = backupInfo.backup_dir + "/full/oplog_" + uriInfo.replSetName + ".json";
-        fs.writeFileSync(statusFile, `[${oplogTime.getLowBits()} , ${oplogTime.getHighBits()}]`);
         console.log(`ReplicaSetDB fullbackup finish : ${this.url} ok, ${(new Date().getTime()-startTime)/1000}`);
+        let statusFile = backupInfo.backup_dir + "/full/oplog_" + uriInfo.replSetName + ".json";
+        console.log(`ReplicaSetDB write current oplog status : ${this.url}  ${oplogTime}..`);
+        fs.writeFileSync(statusFile, `[${oplogTime.getLowBits()} , ${oplogTime.getHighBits()}]`);
         db.close();
         return Result.ok("ok");
     } catch (err) {

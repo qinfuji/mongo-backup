@@ -158,9 +158,11 @@ async function dump(cmd, db) {
             console.log(`stdout: ${stdout}`);
             console.log(`stderr: ${stderr}`);
             if (error) {
+                console.log(`dump ${db.url} error: ${ error }`)
                 reject(Result.fail(`dump ${db.url} error: ${ error }`))
                 return;
             }
+            console.log(`dump ${db.url} ok`)
             resolve(Result.ok(`dump ${db.url} ok`))
         })
     })
