@@ -154,7 +154,7 @@ Node.prototype.connect = async function() {
 async function dump(cmd, db) {
     console.log(cmd)
     return new Promise((resolve, reject) => {
-        exec(cmd, (error, stdout, stderr) => {
+        exec(cmd, { maxBuffer: 5000 * 1024 }, (error, stdout, stderr) => {
             console.log(`stdout: ${stdout}`);
             console.log(`stderr: ${stderr}`);
             if (error) {
