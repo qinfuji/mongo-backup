@@ -68,17 +68,18 @@ ReplicaSetDB.prototype.incbackup = async function(backupDir) {
         if (!lastTime) {
             throw new Error("no oplog position")
         }
-        //let lockRet = await secondaryNode.fsyncLock(); //枷锁数据
+        let lastTimestamp = new Timestamp(lastTime[1], lastTime[0])
+            //let lockRet = await secondaryNode.fsyncLock(); //枷锁数据
         let currentOplogTime = await secondaryNode.oplogTimestamp(); //当前数据节点的最后log时间
         if (!lastTime) {
             return Result.fail("没有oplog时间")
         }
         //设置目录后缀
-        let incSuffix = lastTime.getHighBits() + "_" + lastTime.getLowBits + "_" + currentOplogTime.getHighBits() + "_" + currentOplogTime.getLowBits()
+        let incSuffix = lastTimestamp.getHighBits() + "_" + lastTimestamp.getLowBits + "_" + currentOplogTime.getHighBits() + "_" + currentOplogTime.getLowBits()
         let replSetBackupDir = path.join(backupDir, "inc", uriInfo.replSetName + "_" + incSuffix);
         let _backupInfo = {
             backup_dir: replSetBackupDir, //增量备份目录,时间是读取的最后时间
-            lastTimestamp: new Timestamp(lastTime[1], lastTime[0]) //最后读取的时间
+            lastTimestamp: lastTimestamp //最后读取的时间
         }
         console.log("inc backup info ", _backupInfo);
         let backupResult = await secondaryNode.incbackup(_backupInfo);
