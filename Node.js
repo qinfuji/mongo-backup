@@ -3,7 +3,6 @@
  */
 const MongoClient = require('mongodb').MongoClient
 const Timestamp = require('mongodb').Timestamp
-const { exec } = require('child_process');
 const Result = require("./Result");
 const { cmdExe } = require("./utils");
 /**
