@@ -25,25 +25,31 @@ if (program.deploy == 'replSet') {
 } else if (program.deploy == 'sharding') {
     BackupDB = require("./ShardingDB")
 }
-let backupDB = new BackupDB(program.uri);
-try {
-    if (program.mode == 'full') {
-        let fullRetInfos = await backupDB.fullbackup(program.backupdir);
-    }
-    let incRetInfos = await backupDB.incbackup(program.backupdir);
-    //重新整理路径
-    if (!Array.isArray(incRetInfos)) {
-        //如果是多个增量文件，并且将增量文件移动到指定目录
-        incRetInfos = [incRetInfos];
-    }
-    incRetInfos.forEeach(function(incRetInfo) {
-        let finishDir = incRetInfo.finishDir
-        let baseName = path.baseName(finishDir);
-        let cmd_line = `cp -P ${findshDir}/local/oplog.rs.bson ${program.backupdir}/incfinish/oplog.rs_${baseName}.bson`;
-        cmdExe(cmd_line).then(function() {}).catch(function(err) {
-            console.log(err, err.stack)
+
+async function back() {
+    let backupDB = new BackupDB(program.uri);
+    try {
+        if (program.mode == 'full') {
+            let fullRetInfos = await backupDB.fullbackup(program.backupdir);
+        }
+        let incRetInfos = await backupDB.incbackup(program.backupdir);
+        //重新整理路径
+        if (!Array.isArray(incRetInfos)) {
+            //如果是多个增量文件，并且将增量文件移动到指定目录
+            incRetInfos = [incRetInfos];
+        }
+        incRetInfos.forEeach(function(incRetInfo) {
+            let finishDir = incRetInfo.finishDir
+            let baseName = path.baseName(finishDir);
+            let cmd_line = `cp -P ${findshDir}/local/oplog.rs.bson ${program.backupdir}/incfinish/oplog.rs_${baseName}.bson`;
+            cmdExe(cmd_line).then(function() {}).catch(function(err) {
+                console.log(err, err.stack)
+            })
         })
-    })
-} catch (err) {
-    console.log(err, err.stack);
+        return;
+    } catch (err) {
+        console.log(err, err.stack);
+    }
 }
+
+await back();
