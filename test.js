@@ -27,17 +27,13 @@ let sdb = new ShardingDB("mongodb://10.90.13.157:27017,10.90.13.158:27017")
 // })
 
 
-// sdb.fullbackup({
-//     backup_dir: __dirname
-// }).then(function(result) {
-//     console.log("fullbackup finish ", result)
-// }).catch(function(err) {
-//     console.log("fullbackup error ", err.stack)
-// })
+sdb.fullbackup(__dirname).then(function(result) {
+    console.log("fullbackup finish ", result)
+}).catch(function(err) {
+    console.log("fullbackup error ", err.stack)
+})
 
-sdb.incbackup({
-    backup_dir: __dirname
-}).then(function(result) {
+sdb.incbackup(__dirname).then(function(result) {
     console.log("incbackup finish ", result)
 }).catch(function(err) {
     console.log("incbackup error ", err.stack)
@@ -138,3 +134,7 @@ sdb.incbackup({
 
 // var re = require("c:\\timestamp.json")
 // console.log(re);
+
+// const oplogs = require("./Oplog");
+// const path = require("path")
+// oplogs.merge(path.join(__dirname, "oplogs/oplog.rs.bson"), path.join(__dirname, "oplogs/oplog.rs_1.bson"))

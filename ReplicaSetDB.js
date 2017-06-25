@@ -3,6 +3,8 @@ const DB = require("./DB")
 var fs = require('fs');
 var Result = require("./Result")
 const Timestamp = require('mongodb').Timestamp;
+const { getUriInfo } = require("./utils");
+const path = require("path");
 
 function ReplicaSetDB(url) {
     DB.apply(this, [url]);
@@ -12,30 +14,35 @@ ReplicaSetDB.prototype.constructor = ReplicaSetDB;
 ReplicaSetDB.prototype = Object.create(DB.prototype);
 
 
-ReplicaSetDB.prototype.fullbackup = async function(backupInfo) {
+ReplicaSetDB.prototype.fullbackup = async function(backupDir) {
 
     let db = await this.getDb();
     let secondaryNode = await this.getSecondaryNode()
     console.log(`ReplicaSetDB fullbackup ${this.url} : ${secondaryNode.toString()}`)
+    let fullBackdir = path.join(backupDir, "full");
+    let statusFile = path.join(backupDir, "oplog_" + uriInfo.replSetName + "_status.json");
+
     try {
         let startTime = new Date().getTime();
-        let uriInfo = this.getUriInfo();
+        let uriInfo = getUriInfo(this.url);
         //let lockRet = await secondaryNode.fsyncLock(); //加入锁
         let oplogTime = await secondaryNode.oplogTimestamp() //得到最后的oplog时间
-        let backupDir = backupInfo.backup_dir + "/full" + "/" + uriInfo.replSetName; //全量备份目录
-        console.log(`start backup  ReplicaSetDB ${this.url}   to  ${backupDir} ...`);
+        let replSetBackupDir = path.join(fullBackdir, uriInfo.replSetName); //全量备份目录
+        console.log(`start backup  ReplicaSetDB ${this.url}   to  ${replSetBackupDir} ...`);
+
         let backupResult = await secondaryNode.fullbackup({
-            backup_dir: backupDir,
-            db: backupInfo.db //需要备份的数据库
+            backup_dir: replSetBackupDir
         });
         //let unLockRet = await secondaryNode.fsyncUnLock();
         //将最后的日志时间写入备份根目录
         console.log(`ReplicaSetDB fullbackup finish : ${this.url} ok, ${(new Date().getTime()-startTime)/1000}`);
-        let statusFile = backupInfo.backup_dir + "/full/oplog_" + uriInfo.replSetName + ".json";
         console.log(`ReplicaSetDB write current oplog status : ${this.url}  ${oplogTime}..`);
         fs.writeFileSync(statusFile, `[${oplogTime.getHighBits()} , ${oplogTime.getLowBits()}]`);
         db.close();
-        return Result.ok("ok");
+        return {
+            finishDir: replSetBackupDir,
+            statusFile: statusFile
+        }
     } catch (err) {
         //let unLockRet = secondaryNode.fsyncUnLock();
         let msg = `ReplicaSetDB fullbackup error ,  ${this.url} ${err.stack}`;
@@ -46,17 +53,18 @@ ReplicaSetDB.prototype.fullbackup = async function(backupInfo) {
 }
 
 
-ReplicaSetDB.prototype.incbackup = async function(backupInfo) {
+ReplicaSetDB.prototype.incbackup = async function(backupDir) {
 
     let startTime = new Date().getTime();
     let db = await this.getDb();
     let secondaryNode = await this.getSecondaryNode()
     console.log(`incbackup ${secondaryNode.url} start ...`)
-    let uriInfo = this.getUriInfo();
+    let uriInfo = getUriInfo(this.url);
+    let statusFile = path.join(backupDir, "oplog_" + uriInfo.replSetName + "_status.json");
     try {
         //读取上次增量被封的log的时间
         //如果没有增量信息，则抛出错误
-        let lastTime = require(backupInfo.backup_dir + "/full/oplog_" + uriInfo.replSetName + ".json")
+        let lastTime = require(statusFile)
         if (!lastTime) {
             throw new Error("no oplog position")
         }
@@ -65,21 +73,29 @@ ReplicaSetDB.prototype.incbackup = async function(backupInfo) {
         if (!lastTime) {
             return Result.fail("没有oplog时间")
         }
+        //设置目录后缀
+        let incSuffix = lastTime.getHighBits() + "_" + lastTime.getLowBits + "_" + currentOplogTime.getHighBits() + "_" + currentOplogTime.getLowBits()
+        let replSetBackupDir = path.join(backupDir, "inc", uriInfo.replSetName + "_" + incSuffix);
         let _backupInfo = {
-            backup_dir: backupInfo.backup_dir + "/inc-" + currentOplogTime.getHighBits() + '_' + currentOplogTime.getLowBits(), //增量备份目录,时间是读取的最后时间
+            backup_dir: replSetBackupDir, //增量备份目录,时间是读取的最后时间
             lastTimestamp: new Timestamp(lastTime[1], lastTime[0]) //最后读取的时间
         }
         console.log("inc backup info ", _backupInfo);
         let backupResult = await secondaryNode.incbackup(_backupInfo);
         //let unLockRet = await secondaryNode.fsyncUnLock();
         //保存当前状态到文件
-        let statusFile = backupInfo.backup_dir + "/full/oplog_" + uriInfo.replSetName + ".json";
         console.log(`ReplicaSetDB write current oplog status : ${this.url}  ${currentOplogTime}..`);
         fs.writeFileSync(statusFile, `[${currentOplogTime.getHighBits()} , ${currentOplogTime.getLowBits()}]`);
         let msg = `ReplicaSetDB incbackup finish , ${this.url} , ${(new Date().getTime()-startTime)/1000}`;
         console.log(msg);
         db.close();
-        return Result.ok(msg)
+        //return Result.ok("ok")
+        return {
+            finishDir: replSetBackupDir,
+            startTimestamp: lastTime,
+            endTimestamp: currentOplogTime,
+            statusFile: statusFile
+        }
     } catch (err) {
         let msg = `ReplicaSetDB incbackup fail ${this.url} , ${err.stack}`;
         console.log(msg);
@@ -89,8 +105,18 @@ ReplicaSetDB.prototype.incbackup = async function(backupInfo) {
     }
 }
 
-ReplicaSetDB.prototype.saveBackupStatus = async function() {
+/**
+ * 从指定的目录恢复数据
+ */
+ReplicaSetDB.prototype.fullRestore = async function(resotreInfo) {
+    //获取主节点
+    let oneNode = await this.getSecondaryNode();
+    return oneNode.fullRestore(resotreInfo);
+}
 
+ReplicaSetDB.prototype.incRestore = async function(resotreInfo) {
+    let oneNode = await this.getSecondaryNode();
+    return oneNode.incRestore(resotreInfo);
 }
 
 /**
@@ -111,7 +137,7 @@ ReplicaSetDB.prototype.getSecondaryNode = async function() {
         stateMember.forEach(function(member) {
             stateMemberMap[member._id] = member;
         })
-        let uriInfo = this.getUriInfo();
+        let uriInfo = getUriInfo(this.url);
         let masterUrl = ''
         configMembers.forEach((member) => {
             let priority = member.priority;

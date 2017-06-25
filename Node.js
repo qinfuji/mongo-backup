@@ -5,7 +5,7 @@ const MongoClient = require('mongodb').MongoClient
 const Timestamp = require('mongodb').Timestamp
 const { exec } = require('child_process');
 const Result = require("./Result");
-//const moment = require("./moment");
+const { cmdExe } = require("./utils");
 /**
  * 复制集中的一个二级节点
  * @url 节点的地址
@@ -98,7 +98,7 @@ Node.prototype.fullbackup = async function(backupInfo) {
         this.getAuthParam() +
         (backupInfo.db ? " --db " + backupInfo.db : " ") +
         " --out " + backupInfo.backup_dir
-    await dump(cmd_dump, this);
+    await cmdExe(cmd_dump);
 }
 
 /**
@@ -125,7 +125,40 @@ Node.prototype.incbackup = async function(backupInfo) {
         this.getAuthParam() +
         " --host " + this.url + " --out " + backupInfo.backup_dir +
         " --db local --collection oplog.rs --query " + query
-    return dump(cmd_dump, this)
+    return cmdExe(cmd_dump)
+}
+
+
+/**
+ * 全量备份
+ */
+Node.prototype.fullRestore = async function(restoreInfo) {
+    let dir = restoreInfo.backup_dir; //原始的处理
+    let db = restoreInfo.db; //指定的数据库
+    let noIndexRestore = restoreInfo.noIndexRestore; //是否重新处理索引
+    let drop = restoreInfo.drop;
+    let cmd_line = `mongorestore  --host ${this.master} ${this.getAuthParam()} `
+    if (db) {
+        cmd_line += ` --db ${db}`
+    }
+    if (drop) {
+        cmd_line += " --drop "
+    }
+    if (noIndexRestore) {
+        cmd_line += " --noIndexRestore "
+    }
+    cmd += ` --dir ${dir}`
+    return cmdExe(cmd);
+}
+
+/**
+ * 增量备份
+ */
+Node.prototype.incRestore = async function(restotrInfo) {
+    let dir = restoreInfo.backup_dir; //原始的处理
+    let cmd_line = `mongorestore  --host ${this.master} ${this.getAuthParam()} `
+    cmd += ` --oplogReplay --dir ${dir}`
+    return cmdExe(cmd);
 }
 
 
@@ -149,23 +182,6 @@ Node.prototype.connect = async function() {
         this.db = await MongoClient.connect(url);
     }
     return this.db;
-}
-
-async function dump(cmd, db) {
-    console.log(cmd)
-    return new Promise((resolve, reject) => {
-        exec(cmd, { maxBuffer: 5000 * 1024 }, (error, stdout, stderr) => {
-            console.log(`stdout: ${stdout}`);
-            console.log(`stderr: ${stderr}`);
-            if (error) {
-                console.log(`dump ${db.url} error: ${ error }`)
-                reject(Result.fail(`dump ${db.url} error: ${ error }`))
-                return;
-            }
-            console.log(`dump ${db.url} ok`)
-            resolve(Result.ok(`dump ${db.url} ok`))
-        })
-    })
 }
 
 module.exports = Node

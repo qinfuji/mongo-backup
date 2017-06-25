@@ -2,6 +2,8 @@ const MongoClient = require('mongodb').MongoClient
 const DB = require("./DB")
 const ReplicaSetDB = require("./ReplicaSetDB")
 const Result = require("./Result");
+const { getUriInfo } = require("./utils");
+const path = require("path")
 
 function ShardingDB(url) {
     DB.apply(this, [url]);
@@ -26,7 +28,7 @@ ShardingDB.prototype.startBalance = async function() {
 /**
  * 全量备份
  */
-ShardingDB.prototype.fullbackup = async function(backupInfo) {
+ShardingDB.prototype.fullbackup = async function(backupdir) {
     try {
         let startTime = new Date().getTime();
         //await this.stopBalance(); //停止集群负载均衡
@@ -48,14 +50,16 @@ ShardingDB.prototype.fullbackup = async function(backupInfo) {
         //     //return self.stopBalance(); //启动集群负载均衡
         //     throw new Error(`sharding fullbackup fail , ${this.url} , ${err.stack}`)
         // })
+        let retInfos = [];
         if (replSets && replSets.length > 0) {
             for (var i = 0; i < replSets.length; i++) {
-                await replSets[i].fullbackup(backupInfo);
+                let backupRetInfo = await replSets[i].fullbackup(backupdir);
+                retInfos.push(backupRetInfo);
             }
         }
         let msg = `ShardingDB fullbackup  ${this.url}  finish. ${(new Date().getTime()-startTime)/1000}`;
         console.log(msg);
-        return Result.ok(msg);
+        return retInfos;
     } catch (err) {
         //await this.startBalance();
         throw new Error(`sharding fullbackup fail, ${this.url} , ${err}`)
@@ -65,7 +69,7 @@ ShardingDB.prototype.fullbackup = async function(backupInfo) {
 /**
  * 增量备份
  */
-ShardingDB.prototype.incbackup = async function(backupInfo) {
+ShardingDB.prototype.incbackup = async function(backupdir) {
     try {
         console.log(`start incbackup ${this.url} ...`);
         let startTime = new Date().getTime();
@@ -87,14 +91,16 @@ ShardingDB.prototype.incbackup = async function(backupInfo) {
         //     //return self.stopBalance(); //启动集群负载均衡
         //     throw new Error(`sharding incbackup fail , ${this.url} , ${err.stack}`)
         // })
+        let retInfos = [];
         if (replSets && replSets.length > 0) {
             for (var i = 0; i < replSets.length; i++) {
-                await replSets[i].incbackup(backupInfo);
+                let backupRetInfo = await replSets[i].incbackup(backupdir);
+                retInfos.push(backupRetInfo);
             }
         }
         let msg = `ShardingDB incbackup  ${this.url}  finish. ${(new Date().getTime()-startTime)/1000}`;
         console.log(msg);
-        return Result.ok(msg);
+        return retInfos;
     } catch (err) {
         //await this.startBalance();
         let msg = `ShardingDB incbackup error . ${this.url} , ${err.stack}`
@@ -115,7 +121,7 @@ ShardingDB.prototype.getReplSetDB = async function() {
         let shardolleciton = await configDB.collection("shards");
         let shardInfos = await shardolleciton.find({}).toArray();
         let replicaSets = [];
-        let uriInfo = this.getUriInfo();
+        let uriInfo = getUriInfo(this.url);
         shardInfos.forEach((shardInfo) => {
             let shardhost = shardInfo.host;
             let ips = shardhost.split("/");
