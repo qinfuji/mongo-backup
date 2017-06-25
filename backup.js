@@ -52,4 +52,4 @@ async function back() {
     }
 }
 
-await back();
+back();
