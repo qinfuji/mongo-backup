@@ -39,7 +39,7 @@ async function back() {
             //如果是多个增量文件，并且将增量文件移动到指定目录
             incRetInfos = [incRetInfos];
         }
-        incRetInfos.forEeach(function(incRetInfo) {
+        incRetInfos.forEach(function(incRetInfo) {
             let finishDir = incRetInfo.finishDir
             let baseName = path.baseName(finishDir);
             let cmd_line = `cp -P ${findshDir}/local/oplog.rs.bson ${program.backupdir}/incfinish/oplog.rs_${baseName}.bson`;
