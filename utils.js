@@ -1,4 +1,5 @@
 const { exec } = require('child_process');
+const Result = require("./Result");
 
 module.exports.getUriInfo = function(url) {
     let ret = /mongodb:\/\/(?:(.*):(.*)@)?([^?]*)(?:\?replicaSet\=(.*))?/gi.exec(url)
