@@ -67,7 +67,7 @@ ReplicaSetDB.prototype.incbackup = async function(backupInfo) {
         }
         let _backupInfo = {
             backup_dir: backupInfo.backup_dir + "/inc-" + currentOplogTime.getHighBits() + '_' + currentOplogTime.getLowBits(), //增量备份目录,时间是读取的最后时间
-            lastTimestamp: new Timestamp(lastTime[0], lastTime[1]) //最后读取的时间
+            lastTimestamp: new Timestamp(lastTime[1], lastTime[0]) //最后读取的时间
         }
         console.log("inc backup info ", _backupInfo);
         let backupResult = await secondaryNode.incbackup(_backupInfo);
