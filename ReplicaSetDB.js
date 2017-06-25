@@ -33,7 +33,7 @@ ReplicaSetDB.prototype.fullbackup = async function(backupInfo) {
         console.log(`ReplicaSetDB fullbackup finish : ${this.url} ok, ${(new Date().getTime()-startTime)/1000}`);
         let statusFile = backupInfo.backup_dir + "/full/oplog_" + uriInfo.replSetName + ".json";
         console.log(`ReplicaSetDB write current oplog status : ${this.url}  ${oplogTime}..`);
-        fs.writeFileSync(statusFile, `[${oplogTime.getLowBits()} , ${oplogTime.getHighBits()}]`);
+        fs.writeFileSync(statusFile, `[${oplogTime.getHighBits()} , ${oplogTime.getLowBits()}]`);
         db.close();
         return Result.ok("ok");
     } catch (err) {
@@ -66,7 +66,7 @@ ReplicaSetDB.prototype.incbackup = async function(backupInfo) {
             return Result.fail("没有oplog时间")
         }
         let _backupInfo = {
-            backup_dir: backupInfo.backup_dir + "/inc-" + currentOplogTime.getLowBits() + '_' + currentOplogTime.getHighBits(), //增量备份目录,时间是读取的最后时间
+            backup_dir: backupInfo.backup_dir + "/inc-" + currentOplogTime.getHighBits() + '_' + currentOplogTime.getLowBits(), //增量备份目录,时间是读取的最后时间
             lastTimestamp: new Timestamp(lastTime[0], lastTime[1]) //最后读取的时间
         }
         console.log("inc backup info ", _backupInfo);
@@ -75,7 +75,7 @@ ReplicaSetDB.prototype.incbackup = async function(backupInfo) {
         //保存当前状态到文件
         let statusFile = backupInfo.backup_dir + "/full/oplog_" + uriInfo.replSetName + ".json";
         console.log(`ReplicaSetDB write current oplog status : ${this.url}  ${currentOplogTime}..`);
-        fs.writeFileSync(statusFile, `[${currentOplogTime.getLowBits()} , ${currentOplogTime.getHighBits()}]`);
+        fs.writeFileSync(statusFile, `[${currentOplogTime.getHighBits()} , ${currentOplogTime.getLowBits()}]`);
         let msg = `ReplicaSetDB incbackup finish , ${this.url} , ${(new Date().getTime()-startTime)/1000}`;
         console.log(msg);
         db.close();
@@ -87,6 +87,10 @@ ReplicaSetDB.prototype.incbackup = async function(backupInfo) {
         db.close();
         throw new Error(msg)
     }
+}
+
+ReplicaSetDB.prototype.saveBackupStatus = async function() {
+
 }
 
 /**
