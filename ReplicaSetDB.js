@@ -75,7 +75,7 @@ ReplicaSetDB.prototype.incbackup = async function(backupDir) {
             return Result.fail("没有oplog时间")
         }
         //设置目录后缀
-        let incSuffix = lastTimestamp.getHighBits() + "_" + lastTimestamp.getLowBits + "_" + currentOplogTime.getHighBits() + "_" + currentOplogTime.getLowBits()
+        let incSuffix = lastTimestamp.getHighBits() + "_" + lastTimestamp.getLowBits() + "_" + currentOplogTime.getHighBits() + "_" + currentOplogTime.getLowBits()
         let replSetBackupDir = path.join(backupDir, "inc", uriInfo.replSetName + "_" + incSuffix);
         let _backupInfo = {
             backup_dir: replSetBackupDir, //增量备份目录,时间是读取的最后时间
