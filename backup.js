@@ -42,7 +42,7 @@ async function back() {
         }
         incRetInfos.forEach(function(incRetInfo) {
             let finishDir = incRetInfo.finishDir
-            let baseName = path.baseName(finishDir);
+            let baseName = path.basename(finishDir);
             let cmd_line = `cp -P ${findshDir}/local/oplog.rs.bson ${program.backupdir}/incfinish/oplog.rs_${baseName}.bson`;
             cmdExe(cmd_line).then(function() {}).catch(function(err) {
                 console.log(err, err.stack)
