@@ -17,6 +17,7 @@ ReplicaSetDB.prototype = Object.create(DB.prototype);
 ReplicaSetDB.prototype.fullbackup = async function(backupDir) {
 
     let db = await this.getDb();
+    let uriInfo = getUriInfo(this.url);
     let secondaryNode = await this.getSecondaryNode()
     console.log(`ReplicaSetDB fullbackup ${this.url} : ${secondaryNode.toString()}`)
     let fullBackdir = path.join(backupDir, "full");
@@ -24,9 +25,7 @@ ReplicaSetDB.prototype.fullbackup = async function(backupDir) {
 
     try {
         let startTime = new Date().getTime();
-        let uriInfo = getUriInfo(this.url);
-        console.log("==========>", uriInfo)
-            //let lockRet = await secondaryNode.fsyncLock(); //加入锁
+        //let lockRet = await secondaryNode.fsyncLock(); //加入锁
         let oplogTime = await secondaryNode.oplogTimestamp() //得到最后的oplog时间
         let replSetBackupDir = path.join(fullBackdir, uriInfo.replSetName); //全量备份目录
         console.log(`start backup  ReplicaSetDB ${this.url}   to  ${replSetBackupDir} ...`);

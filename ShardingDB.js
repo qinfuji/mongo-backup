@@ -122,7 +122,6 @@ ShardingDB.prototype.getReplSetDB = async function() {
         let shardInfos = await shardolleciton.find({}).toArray();
         let replicaSets = [];
         let uriInfo = getUriInfo(this.url);
-        console.log("---->", uriInfo)
         shardInfos.forEach((shardInfo) => {
             let shardhost = shardInfo.host;
             let ips = shardhost.split("/");
