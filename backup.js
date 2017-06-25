@@ -4,6 +4,7 @@
 
 var program = require('commander');
 var { cmdExe } = require("./utils");
+var path = require("path");
 
 program
     .version('0.0.1')
