@@ -26,6 +26,6 @@ module.exports.cmdExe = async function(cmd) {
         //     console.log(`${cmd} ok`)
         //     resolve(Result.ok(`${cmd} ok`))
         // })
-        return Result.ok(`${cmd} ok`)
+        resolve(Result.ok(`${cmd} ok`))
     })
 }
