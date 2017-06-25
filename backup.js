@@ -34,7 +34,7 @@ async function back() {
             let fullRetInfos = await backupDB.fullbackup(program.backupdir);
         }
         let incRetInfos = await backupDB.incbackup(program.backupdir);
-        console.log("---->", incRetInfos);
+        //console.log("---->", incRetInfos);
         //重新整理路径
         if (!Array.isArray(incRetInfos)) {
             //如果是多个增量文件，并且将增量文件移动到指定目录
