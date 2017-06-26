@@ -151,8 +151,8 @@ Node.prototype.fullRestore = async function(restoreInfo) {
     if (noIndexRestore) {
         cmd_line += " --noIndexRestore "
     }
-    cmd += ` --dir ${dir}`
-    return cmdExe(cmd);
+    cmd_line += ` --dir ${dir}`
+    return cmdExe(cmd_line);
 }
 
 /**
@@ -161,8 +161,8 @@ Node.prototype.fullRestore = async function(restoreInfo) {
 Node.prototype.incRestore = async function(restotrInfo) {
     let dir = restoreInfo.backup_dir; //原始的处理
     let cmd_line = `mongorestore  --host ${this.master} ${this.getAuthParam()} `
-    cmd += ` --oplogReplay --dir ${dir}`
-    return cmdExe(cmd);
+    cmd_line += ` --oplogReplay --dir ${dir}`
+    return cmdExe(cmd_line);
 }
 
 
