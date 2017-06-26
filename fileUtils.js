@@ -65,5 +65,5 @@ module.exports.getAllFiles = getAllFiles;
 //     console.log(err);
 // });
 
-let v = getAllFiles("/Users/qinfuji/mongodbback/fhh_oauth2")
-console.log(v);
+// let v = getAllFiles("/Users/qinfuji/mongodbback/fhh_oauth2")
+// console.log(v);
