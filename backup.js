@@ -54,7 +54,9 @@ async function backup({ backupdir, db }) {
         incRetInfos.forEach(function(incRetInfo) {
             let finishDir = incRetInfo.finishDir
             let baseName = path.basename(finishDir);
-            let cmd_line = `cp  ${finishDir}/local/oplog.rs.bson ${backupdir}/incfinish/oplog.rs_${baseName}.bson`;
+            let toDir = path.join(backupdir, "incfinish");
+            mkdirp.sync(toDir);
+            let cmd_line = `cp  ${finishDir}/local/oplog.rs.bson ${toDir}/oplog.rs_${baseName}.bson`;
             cmdExe(cmd_line).then(function() {}).catch(function(err) {
                 console.log(err, err.stack)
             })
