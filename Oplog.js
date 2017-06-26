@@ -6,7 +6,7 @@ const path = require("path");
 
 function Oplogs() {}
 
-module.exports.merge = function(...filenames, outputFile) {
+module.exports.merge = function(outputFile, ...filenames) {
 
     if (filenames.length == 0) {
         throw new Error("没有需要合并的文件！")
