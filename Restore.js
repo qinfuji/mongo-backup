@@ -75,7 +75,9 @@ async function restore({ backdir, restoreDB }) {
         backup_dir: outputDir
     }).then(function() {
         //移动数据
-        let cmd_line = `mv ${files.join(" ")} ${backdir}/oplog.restored/`
+        let mvtodir = `${backdir}/oplog.restored`;
+        mkdirp.sync(mvtodir)
+        let cmd_line = `mv ${files.join(" ")} ${mvtodirbackdir}`
         cmdExe(cmd_line).then(function() {}).catch(function(err) {
             console.log(err, err.stack)
         })
