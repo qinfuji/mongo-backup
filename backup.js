@@ -5,6 +5,7 @@
 var program = require('commander');
 var { cmdExe } = require("./utils");
 var path = require("path");
+var mkdirp = require('mkdirp');
 
 program
     .version('0.0.1')
@@ -53,7 +54,9 @@ async function backup({ backupdir, db }) {
         incRetInfos.forEach(function(incRetInfo) {
             let finishDir = incRetInfo.finishDir
             let baseName = path.basename(finishDir);
-            let cmd_line = `cp  ${finishDir}/local/oplog.rs.bson ${program.backupdir}/incfinish/oplog.rs_${baseName}.bson`;
+            let toDir = path.jion(program.backupdir, "incfinish");
+            mkdirp.sync(toDir);
+            let cmd_line = `cp  ${finishDir}/local/oplog.rs.bson ${toDir}/incfinish/oplog.rs_${baseName}.bson`;
             cmdExe(cmd_line).then(function() {}).catch(function(err) {
                 console.log(err, err.stack)
             })

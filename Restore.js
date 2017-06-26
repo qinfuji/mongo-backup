@@ -7,7 +7,8 @@ const path = require("path");
 const fs = require("fs");
 const fileUtils = require("./fileUtils");
 const oplog = require("./Oplog");
-var { cmdExe } = require("./utils");
+const { cmdExe } = require("./utils");
+const mkdirp = require('mkdirp');
 
 program
     .version('0.0.1')
@@ -67,6 +68,7 @@ async function restore({ backdir, db }) {
 
     //合并并排序所有增量文件
     let outputDir = path.join(incBackupDir, "temp");
+    mkdirp.sync(outputDir)
     let outputFile = path.join(outputDir, "oplog.bson");
     oplog.merge(files, outputFile);
     //恢复增量文件

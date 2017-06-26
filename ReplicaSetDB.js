@@ -5,6 +5,7 @@ var Result = require("./Result")
 const Timestamp = require('mongodb').Timestamp;
 const { getUriInfo } = require("./utils");
 const path = require("path");
+var mkdirp = require('mkdirp');
 
 function ReplicaSetDB(url) {
     DB.apply(this, [url]);
@@ -22,7 +23,7 @@ ReplicaSetDB.prototype.fullbackup = async function({ backupdir, backupdb }) {
     console.log(`ReplicaSetDB fullbackup ${this.url} : ${secondaryNode.toString()}`)
     let fullBackdir = path.join(backupdir, "full");
     let statusFile = path.join(backupdir, "oplog_" + uriInfo.replSetName + "_status.json");
-
+    mkdirp.sync(fullBackdir);
     try {
         let startTime = new Date().getTime();
         //let lockRet = await secondaryNode.fsyncLock(); //加入锁
