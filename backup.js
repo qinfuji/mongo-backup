@@ -37,12 +37,12 @@ async function backup({ backupdir, db }) {
     try {
         if (program.mode == 'full') {
             let fullRetInfos = await backupDB.fullbackup({
-                backupdir: backupdir,
+                backupdir: path.join(backupdir, db),
                 backupdb: db
             });
         }
         let incRetInfos = await backupDB.incbackup({
-            backupdir: backupdir,
+            backupdir: path.join(backupdir, db),
             backupdb: db
         });
         //console.log("---->", incRetInfos);
