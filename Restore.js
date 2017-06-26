@@ -54,7 +54,7 @@ async function restore({ backdir, db }) {
 
         for (let i = 0; i < maxFilesDir.length; i++) {
             await backupDB.fullRestore({
-                backup_dir: path.join(maxFilesDir[i], db), //原始的处理
+                backup_dir: path.join(maxFilesDir[i].dir, db), //原始的处理
                 noIndexRestore: i < maxFilesDir.length - 1, //是否重新处理索引
                 drop: i == 0, //只有第一次才需要drop数据库
                 db: db
