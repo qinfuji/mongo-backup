@@ -52,10 +52,11 @@ async function restore({ backdir, db }) {
             return a.length > b.length;
         })
         console.log(backupDirs)
-        for (let i = 0; i < maxFilesDir.length; i++) {
+        for (let i = 0; i < backupDirs.length; i++) {
+            let noIndexRestore = backupDirs.length == 1 ? false : (i < backupDirs.length - 1)
             await backupDB.fullRestore({
                 backup_dir: path.join(backupDirs[i].dir, db), //原始的处理
-                noIndexRestore: i < backupDirs.length - 1, //是否重新处理索引
+                noIndexRestore: noIndexRestore, //是否重新处理索引
                 drop: i == 0, //只有第一次才需要drop数据库
                 db: db
             });
