@@ -14,6 +14,8 @@ module.exports.merge = function(outputFile, ...filenames) {
 
     let contents = [];
     filenames.forEach(function(filename) {
+
+        console.log("8", filename);
         contents.push(fs.readFileSync(filename));
     })
     let contentBuffer = Buffer.concat(contents);
