@@ -11,11 +11,12 @@ program
     .option('--deploy [value]', '目标数据库模式，replSet|sharding', '')
     .option('--backupdir [value]', '备份目录', '')
     .option('--uri [value]', 'mongodb链接字符串', '')
+    .option('--db [value]', '要备份的数据库', '')
     .option('--mode [value]', 'full|inc', '')
 program.parse(process.argv);
 
 
-if (!(program.backupdir && program.deploy && program.uri && program.mode)) {
+if (!(program.backupdir && program.deploy && program.uri && program.mode && program.db)) {
     program.help()
     return;
 }
@@ -26,14 +27,23 @@ if (program.deploy == 'replSet') {
 } else if (program.deploy == 'sharding') {
     BackupDB = require("./ShardingDB")
 }
+let backupDB = new BackupDB(program.uri);
 
-async function back() {
-    let backupDB = new BackupDB(program.uri);
+async function backup({ backupdir, db }) {
+    if (!db) {
+        db = "";
+    }
     try {
         if (program.mode == 'full') {
-            let fullRetInfos = await backupDB.fullbackup(program.backupdir);
+            let fullRetInfos = await backupDB.fullbackup({
+                backupdir: backupdir,
+                backupdb: db
+            });
         }
-        let incRetInfos = await backupDB.incbackup(program.backupdir);
+        let incRetInfos = await backupDB.incbackup({
+            backupdir: backupdir,
+            backupdb: db
+        });
         //console.log("---->", incRetInfos);
         //重新整理路径
         if (!Array.isArray(incRetInfos)) {
@@ -43,7 +53,7 @@ async function back() {
         incRetInfos.forEach(function(incRetInfo) {
             let finishDir = incRetInfo.finishDir
             let baseName = path.basename(finishDir);
-            let cmd_line = `cp -P ${finishDir}/local/oplog.rs.bson ${program.backupdir}/incfinish/oplog.rs_${baseName}.bson`;
+            let cmd_line = `cp  ${finishDir}/local/oplog.rs.bson ${program.backupdir}/incfinish/oplog.rs_${baseName}.bson`;
             cmdExe(cmd_line).then(function() {}).catch(function(err) {
                 console.log(err, err.stack)
             })
@@ -54,4 +64,10 @@ async function back() {
     }
 }
 
-back();
+backup({ backupdir: path.join(program.backupdir, program.db), db: program.db }).then(function() {
+    console.log("backup ok")
+}).catch(function(err) {
+    console.log("backup fail", err)
+});
+//await backup({ backupdir: path.join(__dirname, "antiplagiarism"), db: "antiplagiarism" });
+//await backup({ backupdir: path.join(__dirname, "fhh_oauth2"), db: "fhh_oauth2" });

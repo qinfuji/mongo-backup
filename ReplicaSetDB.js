@@ -14,14 +14,14 @@ ReplicaSetDB.prototype.constructor = ReplicaSetDB;
 ReplicaSetDB.prototype = Object.create(DB.prototype);
 
 
-ReplicaSetDB.prototype.fullbackup = async function(backupDir) {
+ReplicaSetDB.prototype.fullbackup = async function({ backupdir, backupdb }) {
 
     let db = await this.getDb();
     let uriInfo = getUriInfo(this.url);
     let secondaryNode = await this.getSecondaryNode()
     console.log(`ReplicaSetDB fullbackup ${this.url} : ${secondaryNode.toString()}`)
-    let fullBackdir = path.join(backupDir, "full");
-    let statusFile = path.join(backupDir, "oplog_" + uriInfo.replSetName + "_status.json");
+    let fullBackdir = path.join(backupdir, "full");
+    let statusFile = path.join(backupdir, "oplog_" + uriInfo.replSetName + "_status.json");
 
     try {
         let startTime = new Date().getTime();
@@ -31,7 +31,8 @@ ReplicaSetDB.prototype.fullbackup = async function(backupDir) {
         console.log(`start backup  ReplicaSetDB ${this.url}   to  ${replSetBackupDir} ...`);
 
         let backupResult = await secondaryNode.fullbackup({
-            backup_dir: replSetBackupDir
+            backup_dir: replSetBackupDir,
+            db: backupdb
         });
         //let unLockRet = await secondaryNode.fsyncUnLock();
         //将最后的日志时间写入备份根目录
@@ -53,14 +54,14 @@ ReplicaSetDB.prototype.fullbackup = async function(backupDir) {
 }
 
 
-ReplicaSetDB.prototype.incbackup = async function(backupDir) {
+ReplicaSetDB.prototype.incbackup = async function({ backupdir, backupdb }) {
 
     let startTime = new Date().getTime();
     let db = await this.getDb();
     let secondaryNode = await this.getSecondaryNode()
     console.log(`incbackup ${secondaryNode.url} start ...`)
     let uriInfo = getUriInfo(this.url);
-    let statusFile = path.join(backupDir, "oplog_" + uriInfo.replSetName + "_status.json");
+    let statusFile = path.join(backupdir, "oplog_" + uriInfo.replSetName + "_status.json");
     try {
         //读取上次增量被封的log的时间
         //如果没有增量信息，则抛出错误
@@ -76,10 +77,11 @@ ReplicaSetDB.prototype.incbackup = async function(backupDir) {
         }
         //设置目录后缀
         let incSuffix = lastTimestamp.getHighBits() + "_" + lastTimestamp.getLowBits() + "_" + currentOplogTime.getHighBits() + "_" + currentOplogTime.getLowBits()
-        let replSetBackupDir = path.join(backupDir, "inc", uriInfo.replSetName + "_" + incSuffix);
+        let replSetBackupDir = path.join(backupdir, "inc", uriInfo.replSetName + "_" + incSuffix);
         let _backupInfo = {
             backup_dir: replSetBackupDir, //增量备份目录,时间是读取的最后时间
-            lastTimestamp: lastTimestamp //最后读取的时间
+            lastTimestamp: lastTimestamp, //最后读取的时间
+            db: backupdb //要备份的数据库
         }
         console.log("inc backup info ", _backupInfo);
         let backupResult = await secondaryNode.incbackup(_backupInfo);

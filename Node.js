@@ -117,9 +117,14 @@ Node.prototype.incbackup = async function(backupInfo) {
     }
     let ns = ""
     if (backupInfo.db) {
-        ns += `, "ns": /${backupInfo.db}/`
+        ns += `{"ns": /^${backupInfo.db}/}`
     }
-    let query = `'{ "ts": { "$gte": Timestamp( ${timestamp.getHighBits()},${timestamp.getLowBits()})${ns}}}'`
+    let query = `{ "ts": { "$gte": Timestamp( ${timestamp.getHighBits()},${timestamp.getLowBits()})}}`
+    if (ns) {
+        query = `'{$and:[${query},${ns}]}'`
+    } else {
+        query = `'${query}'`
+    }
     let cmd_dump = "mongodump" +
         this.getAuthParam() +
         " --host " + this.url + " --out " + backupInfo.backup_dir +

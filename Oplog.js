@@ -6,7 +6,7 @@ const path = require("path");
 
 function Oplogs() {}
 
-module.exports.merge = function(...filenames, output) {
+module.exports.merge = function(...filenames, outputFile) {
 
     if (filenames.length == 0) {
         throw new Error("没有需要合并的文件！")
@@ -43,5 +43,7 @@ module.exports.merge = function(...filenames, output) {
     });
     console.log(rets.length);
     let allbuff = Buffer.concat(rets);
-    fs.writeFileSync(path.join(__dirname, "./oplogs/out.bson"), allbuff);
+    //let outputFile = path.join(output, "./oplogs.bson");
+    fs.writeFileSync(outputFile, allbuff);
+    return outputFile;
 }

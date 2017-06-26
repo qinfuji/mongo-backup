@@ -28,7 +28,7 @@ ShardingDB.prototype.startBalance = async function() {
 /**
  * 全量备份
  */
-ShardingDB.prototype.fullbackup = async function(backupdir) {
+ShardingDB.prototype.fullbackup = async function({ backupdir, backupdb }) {
     try {
         let startTime = new Date().getTime();
         //await this.stopBalance(); //停止集群负载均衡
@@ -53,7 +53,7 @@ ShardingDB.prototype.fullbackup = async function(backupdir) {
         let retInfos = [];
         if (replSets && replSets.length > 0) {
             for (var i = 0; i < replSets.length; i++) {
-                let backupRetInfo = await replSets[i].fullbackup(backupdir);
+                let backupRetInfo = await replSets[i].fullbackup({ backupdir, backupdb });
                 retInfos.push(backupRetInfo);
             }
         }
@@ -69,7 +69,7 @@ ShardingDB.prototype.fullbackup = async function(backupdir) {
 /**
  * 增量备份
  */
-ShardingDB.prototype.incbackup = async function(backupdir) {
+ShardingDB.prototype.incbackup = async function({ backupdir, backupdb }) {
     try {
         console.log(`start incbackup ${this.url} ...`);
         let startTime = new Date().getTime();
@@ -94,7 +94,7 @@ ShardingDB.prototype.incbackup = async function(backupdir) {
         let retInfos = [];
         if (replSets && replSets.length > 0) {
             for (var i = 0; i < replSets.length; i++) {
-                let backupRetInfo = await replSets[i].incbackup(backupdir);
+                let backupRetInfo = await replSets[i].incbackup({ backupdir, backupdb });
                 retInfos.push(backupRetInfo);
             }
         }
