@@ -13,8 +13,8 @@ module.exports.merge = function(outputFile, ...filenames) {
     }
 
     let contents = [];
+    console.log("8", filenames);
     filenames.forEach(function(filename) {
-
         console.log("8", filename);
         contents.push(fs.readFileSync(filename));
     })
