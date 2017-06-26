@@ -158,7 +158,7 @@ Node.prototype.fullRestore = async function(restoreInfo) {
 /**
  * 增量备份
  */
-Node.prototype.incRestore = async function(restotrInfo) {
+Node.prototype.incRestore = async function(restoreInfo) {
     let dir = restoreInfo.backup_dir; //原始的处理
     let cmd_line = `mongorestore  --host ${this.master} ${this.getAuthParam()} `
     cmd_line += ` --oplogReplay --dir ${dir}`
