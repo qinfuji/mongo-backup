@@ -42,20 +42,20 @@ async function restore({ backdir, db }) {
             throw new Error("没有需要处理的数据")
         }
 
-        let maxFilesDir = [];
+        let backupDirs = [];
         dirs.forEach(function(dir) {
             let files = fileUtils.getAllFiles(dir, true);
-            maxFilesDir.push({ dir: dir, length: files.length });
+            backupDirs.push({ dir: dir, length: files.length });
         })
 
-        maxFilesDir = maxFilesDir.sort(function(a, b) {
+        backupDirs = backupDirs.sort(function(a, b) {
             return a.length > b.length;
         })
-
+        console.log(backupDirs)
         for (let i = 0; i < maxFilesDir.length; i++) {
             await backupDB.fullRestore({
-                backup_dir: path.join(maxFilesDir[i].dir, db), //原始的处理
-                noIndexRestore: i < maxFilesDir.length - 1, //是否重新处理索引
+                backup_dir: path.join(backupDirs[i].dir, db), //原始的处理
+                noIndexRestore: i < backupDirs.length - 1, //是否重新处理索引
                 drop: i == 0, //只有第一次才需要drop数据库
                 db: db
             });
