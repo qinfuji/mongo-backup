@@ -64,13 +64,16 @@ async function restore({ backdir, restoreDB }) {
     }
 
     //获取数据库的所有增量文件
+    console.log("3", backdir)
     let incBackupDir = path.join(backdir, "incfinish");
     let files = fileUtils.getAllFiles(incBackupDir);
-
-    //合并并排序所有增量文件
+    console.log("4", files)
+        //合并并排序所有增量文件
     let outputDir = path.join(incBackupDir, "temp");
+    console.log("5", outputDir)
     mkdirp.sync(outputDir)
     let outputFile = path.join(outputDir, "oplog.bson");
+    console.log("6", outputDir)
     oplog.merge(outputFile, files);
     //恢复增量文件
     backupDB.incRestore({
