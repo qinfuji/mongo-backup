@@ -6,16 +6,14 @@ const path = require("path");
 
 function Oplogs() {}
 
-module.exports.merge = function(outputFile, ...filenames) {
+module.exports.merge = function(outputFile, filenames) {
 
     if (filenames.length == 0) {
         throw new Error("没有需要合并的文件！")
     }
 
     let contents = [];
-    console.log("8", filenames);
     filenames.forEach(function(filename) {
-        console.log("8", filename);
         contents.push(fs.readFileSync(filename));
     })
     let contentBuffer = Buffer.concat(contents);
