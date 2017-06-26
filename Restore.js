@@ -41,7 +41,6 @@ async function restore({ backdir, restoreDB }) {
         if (!dirs || !dirs.length) {
             throw new Error("没有需要处理的数据")
         }
-        console.log("1", dirs);
         let backupDirs = [];
         dirs.forEach(function(dir) {
             let files = fileUtils.getAllFiles(dir, true);
@@ -51,7 +50,6 @@ async function restore({ backdir, restoreDB }) {
         backupDirs = backupDirs.sort(function(a, b) {
             return a.length > b.length;
         })
-        console.log("2", backupDirs)
         for (let i = 0; i < backupDirs.length; i++) {
             let noIndexRestore = backupDirs.length == 1 ? false : (i < backupDirs.length - 1)
             await backupDB.fullRestore({
@@ -64,19 +62,15 @@ async function restore({ backdir, restoreDB }) {
     }
 
     //获取数据库的所有增量文件
-    console.log("3", backdir)
     let incBackupDir = path.join(backdir, "incfinish");
     let files = fileUtils.getAllFiles(incBackupDir, true);
-    console.log("4", files)
-        //合并并排序所有增量文件
+    //合并并排序所有增量文件
     let outputDir = path.join(incBackupDir, "temp");
-    console.log("5", outputDir)
     mkdirp.sync(outputDir)
     let outputFile = path.join(outputDir, "oplog.bson");
-    console.log("6", outputFile)
     await oplog.merge(outputFile, files);
-    console.log("7", outputFile);
     //恢复增量文件
+    console.log("restore oplog dir:", outputDir)
     backupDB.incRestore({
         backup_dir: outputDir
     }).then(function() {

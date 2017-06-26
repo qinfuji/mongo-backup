@@ -9,7 +9,6 @@ function findChildDir(dirPath) {
         let childDirs = [];
         files.forEach(function(file) {
             file = path.resolve(dirPath, file);
-            console.log(file);
             let stat = fs.statSync(file);
             if (stat && stat.isDirectory()) {
                 console.log(file)
