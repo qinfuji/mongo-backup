@@ -66,7 +66,7 @@ async function restore({ backdir, restoreDB }) {
     //获取数据库的所有增量文件
     console.log("3", backdir)
     let incBackupDir = path.join(backdir, "incfinish");
-    let files = fileUtils.getAllFiles(incBackupDir);
+    let files = fileUtils.getAllFiles(incBackupDir, true);
     console.log("4", files)
         //合并并排序所有增量文件
     let outputDir = path.join(incBackupDir, "temp");
