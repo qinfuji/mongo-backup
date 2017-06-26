@@ -79,6 +79,7 @@ ReplicaSetDB.prototype.incbackup = async function({ backupdir, backupdb }) {
         //设置目录后缀
         let incSuffix = lastTimestamp.getHighBits() + "_" + lastTimestamp.getLowBits() + "_" + currentOplogTime.getHighBits() + "_" + currentOplogTime.getLowBits()
         let replSetBackupDir = path.join(backupdir, "inc", uriInfo.replSetName + "_" + incSuffix);
+        mkdirp.sync(replSetBackupDir);
         let _backupInfo = {
             backup_dir: replSetBackupDir, //增量备份目录,时间是读取的最后时间
             lastTimestamp: lastTimestamp, //最后读取的时间
