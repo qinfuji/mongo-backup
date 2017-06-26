@@ -37,12 +37,12 @@ async function backup({ backupdir, db }) {
     try {
         if (program.mode == 'full') {
             let fullRetInfos = await backupDB.fullbackup({
-                backupdir: path.join(backupdir, db),
+                backupdir: backupdir,
                 backupdb: db
             });
         }
         let incRetInfos = await backupDB.incbackup({
-            backupdir: path.join(backupdir, db),
+            backupdir: backupdir,
             backupdb: db
         });
         //console.log("---->", incRetInfos);
@@ -54,9 +54,8 @@ async function backup({ backupdir, db }) {
         incRetInfos.forEach(function(incRetInfo) {
             let finishDir = incRetInfo.finishDir
             let baseName = path.basename(finishDir);
-            let toDir = path.join(backupdir, db, "incfinish");
             mkdirp.sync(toDir);
-            let cmd_line = `cp  ${finishDir}/local/oplog.rs.bson ${toDir}/incfinish/oplog.rs_${baseName}.bson`;
+            let cmd_line = `cp  ${finishDir}/local/oplog.rs.bson ${backupdir}/incfinish/oplog.rs_${baseName}.bson`;
             cmdExe(cmd_line).then(function() {}).catch(function(err) {
                 console.log(err, err.stack)
             })
