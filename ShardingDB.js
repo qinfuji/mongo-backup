@@ -16,12 +16,14 @@ ShardingDB.prototype = Object.create(DB.prototype);
 ShardingDB.prototype.stopBalance = async function() {
     let db = await this.getDb();
     await setBanlance(db, true);
+    console.log("ShardingDB stopBalance")
     db.close();
 }
 
 ShardingDB.prototype.startBalance = async function() {
     let db = await this.getDb();
     await setBanlance(db, false);
+    console.log("ShardingDB startBalance")
     db.close();
 }
 
