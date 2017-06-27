@@ -15,13 +15,13 @@ ShardingDB.prototype = Object.create(DB.prototype);
 
 ShardingDB.prototype.stopBalance = async function() {
     let db = await this.getDb();
-    setBanlance(db, true);
+    await setBanlance(db, true);
     db.close();
 }
 
 ShardingDB.prototype.startBalance = async function() {
     let db = await this.getDb();
-    setBanlance(db, false);
+    await setBanlance(db, false);
     db.close();
 }
 
@@ -143,7 +143,7 @@ ShardingDB.prototype.getReplSetDB = async function() {
 async function setBanlance(db, state) {
     let configdb = db.db("config");
     let config_col = configdb.collection("settings")
-    return config_col.update({ _id: "balancer" }, { '$set': { 'stopped': state } });
+    return await config_col.update({ _id: "balancer" }, { '$set': { 'stopped': state } });
 }
 
 module.exports = ShardingDB;
