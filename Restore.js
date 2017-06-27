@@ -50,7 +50,7 @@ async function restore({ backdir, restoreDB }) {
         })
 
         backupDirs = backupDirs.sort(function(a, b) {
-            return a.length > b.length;
+            return a.length < b.length;
         })
         for (let i = 0; i < backupDirs.length; i++) {
             let noIndexRestore = backupDirs.length == 1 ? false : (i < backupDirs.length - 1)
