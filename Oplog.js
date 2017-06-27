@@ -53,6 +53,7 @@ module.exports.merge = function(outputFile, filenames) {
  * 验证合并后的文件，保证在时间上是升序的
  */
 module.exports.vailde = function(filename) {
+    var bson = new BSON();
     let contentBuffer = fs.readFileSync(filename)
     let bufIdx = 0;
     const docCount = 1;
