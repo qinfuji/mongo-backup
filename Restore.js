@@ -29,6 +29,8 @@ let BackupDB = require("./ReplicaSetDB")
 let backupDB = new BackupDB(program.uri);
 
 async function restore({ backdir, restoreDB }) {
+
+    let startTime = new Date().getTime();
     if (program.mode == 'full') {
         //读取全量备份目录下所有备份目录
         //文件少的先读取
@@ -59,6 +61,7 @@ async function restore({ backdir, restoreDB }) {
                 db: restoreDB
             });
         }
+        let msg = `ReplicaSetDB fullrestore finish , ${(new Date().getTime()-startTime)/1000}`;
     }
 
     //获取数据库的所有增量文件
@@ -68,14 +71,15 @@ async function restore({ backdir, restoreDB }) {
     let outputDir = path.join(incBackupDir, "temp");
     mkdirp.sync(outputDir)
     let outputFile = path.join(outputDir, "oplog.bson");
-    oplog.merge(outputFile, files);
-    oplog.vailde(outputFile);
+    oplog.merge(outputFile, files); //合并所有oplog文件
+    oplog.vailde(outputFile); //验证合并的文件是否有问题
     //恢复增量文件
-    console.log("restore oplog dir:", outputDir)
+    console.log(`restore merge oplog finish . ${(new Date().getTime()-startTime)/1000}`)
     backupDB.incRestore({
         backup_dir: outputDir
     }).then(function() {
-        //移动数据
+        console.log(`increstore finish . ${(new Date().getTime()-startTime)/1000}`)
+            //移动数据
         cmdExe(`rm -rf ${outputDir}`).then(function() {
             console.log(`rm -rf ${outputDir} ok`)
         }).catch(function(err) {
