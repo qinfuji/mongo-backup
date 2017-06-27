@@ -143,7 +143,7 @@ ShardingDB.prototype.getReplSetDB = async function() {
 async function setBanlance(db, state) {
     let configdb = db.db("config");
     let config_col = configdb.collection("settings")
-    return config_col.update({ _id: "balance" }, { '$set': { 'stopped': state } });
+    return config_col.update({ _id: "balancer" }, { '$set': { 'stopped': state } });
 }
 
 module.exports = ShardingDB;
