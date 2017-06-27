@@ -69,7 +69,7 @@ module.exports.vailde = function(filename) {
             let l = new Timestamp(lastDoc.ts.low_, curDoc.ts.high_);
             let c = new Timestamp(lastDoc.ts.low_, curDoc.ts.high_);
             let ret = l.compare(c)
-            if (ret == -1) {
+            if (ret == 1) {
                 throw new Error("oplog time error");
             }
         }
