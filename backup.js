@@ -45,7 +45,7 @@ async function backup({ backupdir, db }) {
             backupdir: backupdir,
             backupdb: db
         });
-        //console.log("---->", incRetInfos);
+        //console.log("---------------->", incRetInfos);
         //重新整理路径
         if (!Array.isArray(incRetInfos)) {
             //如果是多个增量文件，并且将增量文件移动到指定目录

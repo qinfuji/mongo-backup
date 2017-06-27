@@ -5,6 +5,7 @@ const MongoClient = require('mongodb').MongoClient
 const Timestamp = require('mongodb').Timestamp
 const Result = require("./Result");
 const { cmdExe } = require("./utils");
+const { exec } = require('child_process');
 /**
  * 复制集中的一个二级节点
  * @url 节点的地址
@@ -34,14 +35,14 @@ Node.prototype.fsyncLock = async function() {
             console.log(`stdout: ${stdout}`);
             console.log(`stderr: ${stderr}`);
             if (error) {
-                reject(Result.ok(`fsyncLock ${this.url} error: ${error}`));
+                reject(`fsyncLock ${this.url} error: ${error}`);
                 return;
             }
             if (stdout && stdout.match(/fsyncLock.*true/) /*.match(stdout)*/ ) {
                 console.log(`fsyncLock ${this.url} ok!`);
-                resolve(Result.ok(`fsyncLock ${this.url} ok!`));
+                resolve(`fsyncLock ${this.url} ok!`);
             } else {
-                reject(Result.fail(`fsyncLock ${this.url} fail ${stdout}`))
+                reject(`fsyncLock ${this.url} fail ${stdout}`);
             }
         })
     })
@@ -55,7 +56,6 @@ Node.prototype.getAuthParam = function() {
     return auth;
 }
 
-
 /**
  * 解锁当前节点
  */
@@ -63,21 +63,22 @@ Node.prototype.fsyncUnLock = async function() {
     return new Promise((resolve, reject) => {
         let commandLine = 'mongo ' + this.url + '/admin ' + this.getAuthParam() +
             " --eval 'db.fsyncUnlock()'" +
-            " | grep 'fsyncUnlock completed' | grep ok "
+            " | egrep 'fsyncUnlock completed|not locked|unlock completed' | grep ok "
+
         exec(commandLine, (error, stdout, stderr) => {
             console.log(`error: ${error}`);
             console.log(`stdout: ${stdout}`);
             console.log(`stderr: ${stderr}`);
             if (error) {
-                reject(Result.fail(`fsyncUnLock ${this.url} error: ${error}`))
+                reject(`fsyncUnLock ${this.url} error: ${error}`);
                 return;
             }
-            if (stdout && stdout.match(/fsyncUnlock completed/)) {
+            if (stdout && stdout.match(/fsyncUnlock completed|not locked|unlock completed/)) {
                 console.log(`fsyncUnLock ${this.url}  ok !`)
-                resolve(Result.ok(`fsyncUnLock ${this.url}  ok !`));
+                resolve(`fsyncUnLock ${this.url}  ok !`);
             } else {
                 console.log(`fsyncUnLock ${this.url}  fail !`)
-                reject(Result.fail(`fsyncUnLock ${this.url}  fail!  ${stdout}\n${stderr}`))
+                reject(`fsyncUnLock ${this.url}  fail!  ${stdout}\n${stderr}`)
             }
         })
     })

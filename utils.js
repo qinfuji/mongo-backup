@@ -11,7 +11,6 @@ module.exports.getUriInfo = function(url) {
     }
 }
 
-
 module.exports.cmdExe = async function(cmd) {
     console.log(cmd)
     return new Promise((resolve, reject) => {

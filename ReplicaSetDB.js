@@ -26,7 +26,7 @@ ReplicaSetDB.prototype.fullbackup = async function({ backupdir, backupdb }) {
     mkdirp.sync(fullBackdir);
     try {
         let startTime = new Date().getTime();
-        //let lockRet = await secondaryNode.fsyncLock(); //加入锁
+        let lockRet = await secondaryNode.fsyncLock(); //加入锁
         let oplogTime = await secondaryNode.oplogTimestamp() //得到最后的oplog时间
         let replSetBackupDir = path.join(fullBackdir, uriInfo.replSetName); //全量备份目录
         console.log(`start backup  ReplicaSetDB ${this.url}   to  ${replSetBackupDir} ...`);
@@ -35,7 +35,7 @@ ReplicaSetDB.prototype.fullbackup = async function({ backupdir, backupdb }) {
             backup_dir: replSetBackupDir,
             db: backupdb
         });
-        //let unLockRet = await secondaryNode.fsyncUnLock();
+        let unLockRet = await secondaryNode.fsyncUnLock();
         //将最后的日志时间写入备份根目录
         console.log(`ReplicaSetDB fullbackup finish : ${this.url} ok, ${(new Date().getTime()-startTime)/1000}`);
         console.log(`ReplicaSetDB write current oplog status : ${this.url}  ${oplogTime}..`);
@@ -46,8 +46,8 @@ ReplicaSetDB.prototype.fullbackup = async function({ backupdir, backupdb }) {
             statusFile: statusFile
         }
     } catch (err) {
-        //let unLockRet = secondaryNode.fsyncUnLock();
-        let msg = `ReplicaSetDB fullbackup error ,  ${this.url} ${err.stack}`;
+        let unLockRet = secondaryNode.fsyncUnLock();
+        let msg = `ReplicaSetDB fullbackup error ,  ${this.url} , ${err} , ${err.stack}`;
         console.log(msg)
         db.close();
         throw new Error(msg)
@@ -70,11 +70,11 @@ ReplicaSetDB.prototype.incbackup = async function({ backupdir, backupdb }) {
         if (!lastTime) {
             throw new Error("no oplog position")
         }
-        let lastTimestamp = new Timestamp(lastTime[1], lastTime[0])
-            //let lockRet = await secondaryNode.fsyncLock(); //枷锁数据
+        let lastTimestamp = new Timestamp(lastTime[1], lastTime[0]);
+        let lockRet = await secondaryNode.fsyncLock(); //枷锁数据
         let currentOplogTime = await secondaryNode.oplogTimestamp(); //当前数据节点的最后log时间
         if (!lastTime) {
-            return Result.fail("没有oplog时间")
+            throw new Error("没有oplog时间")
         }
         //设置目录后缀
         let incSuffix = lastTimestamp.getHighBits() + "_" + lastTimestamp.getLowBits() + "_" + currentOplogTime.getHighBits() + "_" + currentOplogTime.getLowBits()
@@ -87,14 +87,13 @@ ReplicaSetDB.prototype.incbackup = async function({ backupdir, backupdb }) {
         }
         console.log("inc backup info ", _backupInfo);
         let backupResult = await secondaryNode.incbackup(_backupInfo);
-        //let unLockRet = await secondaryNode.fsyncUnLock();
+        let unLockRet = await secondaryNode.fsyncUnLock();
         //保存当前状态到文件
         console.log(`ReplicaSetDB write current oplog status : ${this.url}  ${currentOplogTime}..`);
         fs.writeFileSync(statusFile, `[${currentOplogTime.getHighBits()} , ${currentOplogTime.getLowBits()}]`);
         let msg = `ReplicaSetDB incbackup finish , ${this.url} , ${(new Date().getTime()-startTime)/1000}`;
         console.log(msg);
         db.close();
-        //return Result.ok("ok")
         return {
             finishDir: replSetBackupDir,
             startTimestamp: lastTime,
@@ -104,7 +103,7 @@ ReplicaSetDB.prototype.incbackup = async function({ backupdir, backupdb }) {
     } catch (err) {
         let msg = `ReplicaSetDB incbackup fail ${this.url} , ${err.stack}`;
         console.log(msg);
-        //let unLockRet = secondaryNode.fsyncUnLock();
+        let unLockRet = secondaryNode.fsyncUnLock();
         db.close();
         throw new Error(msg)
     }

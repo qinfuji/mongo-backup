@@ -20,7 +20,7 @@ ShardingDB.prototype.stopBalance = async function() {
 }
 
 ShardingDB.prototype.startBalance = async function() {
-    let db = await this.gteDb();
+    let db = await this.getDb();
     setBanlance(db, false);
     db.close();
 }
@@ -31,38 +31,37 @@ ShardingDB.prototype.startBalance = async function() {
 ShardingDB.prototype.fullbackup = async function({ backupdir, backupdb }) {
     try {
         let startTime = new Date().getTime();
-        //await this.stopBalance(); //停止集群负载均衡
+        await this.stopBalance(); //停止集群负载均衡
         let replSets = await this.getReplSetDB(); //得到集群中的所有复制集
         console.log(`ShardingDB getReplSetDB ${this.url} replSets ${replSets.toString()}`)
         let waitBackupReplSet = [];
-        // replSets.forEach((replSet) => {
-        //     let _r = replSet.fullbackup(backupInfo);
-        //     waitBackupReplSet.push(_r);
-        // })
-        // let self = this;
-        // //await waitBackupReplSet;
-        // return Promise.all(waitBackupReplSet).then(() => {
-        //     let msg = `ShardingDB fullbackup  ${this.url}  finish. ${(new Date().getTime()-startTime)/1000}`;
-        //     console.log(msg);
-        //     //return self.stopBalance(); //启动集群负载均衡
-        //     return Result.ok(msg);
-        // }).catch((err) => {
-        //     //return self.stopBalance(); //启动集群负载均衡
-        //     throw new Error(`sharding fullbackup fail , ${this.url} , ${err.stack}`)
-        // })
-        let retInfos = [];
-        if (replSets && replSets.length > 0) {
-            for (var i = 0; i < replSets.length; i++) {
-                let backupRetInfo = await replSets[i].fullbackup({ backupdir, backupdb });
-                retInfos.push(backupRetInfo);
-            }
-        }
-        let msg = `ShardingDB fullbackup  ${this.url}  finish. ${(new Date().getTime()-startTime)/1000}`;
-        console.log(msg);
-        return retInfos;
+
+        for (var i = 0; i < replSets.length; i++) {
+            let _r = replSets[i].fullbackup({ backupdir, backupdb });
+            waitBackupReplSet.push(_r);
+        };
+        // let ret = await waitBackupReplSet;
+        // await this.startBalance(); //启动集群负载均衡
+        // let msg = `ShardingDB fullbackup  ${this.url}  finish. ${(new Date().getTime()-startTime)/1000}`;
+        // console.log(msg);
+        // return ret;
+        let self = this;
+        return await Promise.all(waitBackupReplSet).then((result) => {
+            return (async() => {
+                let msg = `ShardingDB fullbackup  ${this.url}  finish. ${(new Date().getTime()-startTime)/1000}`;
+                console.log(msg);
+                await self.startBalance(); //启动集群负载均衡
+                return result;
+            })();
+        }).catch((err) => {
+            return (async() => {
+                await self.startBalance(); //启动集群负载均衡
+                throw new Error(`sharding fullbackup fail , ${this.url} , ${err} , ${err.stack}`)
+            })();
+        });
     } catch (err) {
-        //await this.startBalance();
-        throw new Error(`sharding fullbackup fail, ${this.url} , ${err}`)
+        await this.startBalance();
+        throw new Error(`sharding fullbackup fail, ${this.url} , ${err} ,${err}`);
     }
 }
 
@@ -73,37 +72,35 @@ ShardingDB.prototype.incbackup = async function({ backupdir, backupdb }) {
     try {
         console.log(`start incbackup ${this.url} ...`);
         let startTime = new Date().getTime();
-        //await this.stopBalance(); //停止集群负载均衡
+        await this.stopBalance(); //停止集群负载均衡
         let replSets = await this.getReplSetDB(); //得到集群中的所有复制集
-        // let waitBackupReplSet = [];
-        // replSets.forEach(function(replSet) {
-        //     let _r = replSet.incbackup(backupInfo);
-        //     waitBackupReplSet.push(_r);
-        // })
-        // let self = this;
-        //await waitBackupReplSet;
-        // return Promise.all(waitBackupReplSet).then(() => {
-        //     let msg = `ShardingDB incbackup  ${this.url}  finish. ${(new Date().getTime()-startTime)/1000}`;
-        //     console.log(msg);
-        //     //return self.stopBalance(); //启动集群负载均衡
-        //     return Result.ok(msg);
-        // }).catch(function(err) {
-        //     //return self.stopBalance(); //启动集群负载均衡
-        //     throw new Error(`sharding incbackup fail , ${this.url} , ${err.stack}`)
-        // })
-        let retInfos = [];
-        if (replSets && replSets.length > 0) {
-            for (var i = 0; i < replSets.length; i++) {
-                let backupRetInfo = await replSets[i].incbackup({ backupdir, backupdb });
-                retInfos.push(backupRetInfo);
-            }
-        }
-        let msg = `ShardingDB incbackup  ${this.url}  finish. ${(new Date().getTime()-startTime)/1000}`;
-        console.log(msg);
-        return retInfos;
+        let waitBackupReplSet = [];
+        replSets.forEach(function(replSet) {
+            let _r = replSet.incbackup({ backupdir, backupdb });
+            waitBackupReplSet.push(_r);
+        });
+        // let ret = await waitBackupReplSet;
+        // await this.startBalance(); //启动集群负载均衡
+        // let msg = `ShardingDB incbackup  ${this.url}  finish. ${(new Date().getTime()-startTime)/1000}`;
+        // console.log(msg);
+        // return ret;
+        let self = this;
+        return await Promise.all(waitBackupReplSet).then((result) => {
+            return (async() => {
+                let msg = `ShardingDB incbackup  ${self.url}  finish. ${(new Date().getTime()-startTime)/1000}`;
+                console.log(msg);
+                await self.startBalance(); //启动集群负载均衡
+                return result;
+            })();
+        }).catch((err) => {
+            return (async() => {
+                await self.startBalance(); //启动集群负载均衡
+                throw new Error(`sharding incbackup fail , ${self.url} , ${err}, ${err.stack}`)
+            })();
+        });
     } catch (err) {
-        //await this.startBalance();
-        let msg = `ShardingDB incbackup error . ${this.url} , ${err.stack}`
+        await this.startBalance();
+        let msg = `ShardingDB incbackup error . ${this.url} , ${err} , ${err.stack}`
         console.log(msg)
         throw new Error(msg);
     }
