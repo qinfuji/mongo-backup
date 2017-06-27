@@ -69,7 +69,7 @@ module.exports.vailde = function(filename) {
             let l = new Timestamp(lastDoc.ts.low_, lastDoc.ts.high_);
             let c = new Timestamp(curDoc.ts.low_, curDoc.ts.high_);
             let ret = l.compare(c)
-            if (ret < 1) {
+            if (ret >= 1) {
                 throw new Error("oplog time error");
             }
             curDoc = curDoc;
@@ -77,8 +77,3 @@ module.exports.vailde = function(filename) {
         bufIdx = retIdx;
     }
 }
-
-
-// let l = new Timestamp(2, 1498494545);
-// let c = new Timestamp(1, 1498494545);
-// console.log(l.compare(c))
