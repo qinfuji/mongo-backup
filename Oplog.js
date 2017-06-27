@@ -52,7 +52,7 @@ module.exports.merge = function(outputFile, filenames) {
 /**
  * 验证合并后的文件，保证在时间上是升序的
  */
-function vaildMergeOplogFile(filename) {
+module.exports.vailde = function(filename) {
     let contentBuffer = fs.readFileSync(filename)
     let bufIdx = 0;
     const docCount = 1;

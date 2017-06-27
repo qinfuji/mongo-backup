@@ -69,7 +69,7 @@ async function restore({ backdir, restoreDB }) {
     mkdirp.sync(outputDir)
     let outputFile = path.join(outputDir, "oplog.bson");
     oplog.merge(outputFile, files);
-    oplog.vaildMergeOplogFile(outputFile);
+    oplog.vailde(outputFile);
     //恢复增量文件
     console.log("restore oplog dir:", outputDir)
     backupDB.incRestore({
