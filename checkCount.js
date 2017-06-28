@@ -5,15 +5,22 @@
 const MongoClient = require('mongodb').MongoClient
 const ObjectID = require('mongodb').ObjectID;
 const moment = require("moment");
+const program = require('commander');
 
-async function check(startDate) {
-    let oldDB = await MongoClient.connect("mongodb://10.90.13.157:27017,10.90.13.158:27017/fhh");
-    let newDB = await MongoClient.connect("mongodb://fhh_rw_p:fhh_rw_p@10.90.13.159:27017,10.90.13.160:27017,10.90.13.161:27017/fhh?replicaSet=fhhReplSet");
+//mongodb://xxxx/fhh
+//mongodb://xxxx/fhh?replicaSet=fhhReplSet
+/**
+ * 检测文章数据数量
+ */
+async function check(startDate, endDate, sourceDBUrl, targetDBUrl) {
+
+    console.log(arguments)
+    let oldDB = await MongoClient.connect(sourceDBUrl);
+    let newDB = await MongoClient.connect(targetDBUrl);
     try {
-
         let oArtialeCol = oldDB.collection("article");
         let nArtialeCol = newDB.collection("article");
-        let cursor = oArtialeCol.find({ $and: [{ importTime: { $gte: new Date("2017-06-28 16:30:00") } }, { importTime: { $lte: new Date("2017-06-28 17:00:00") } }] }, { importTime: 1 })
+        let cursor = oArtialeCol.find({ $and: [{ importTime: { $gte: startDate.toDate() } }, { importTime: { $lte: endDate.toDate() } }] }, { importTime: 1 })
         let count = 0;
         while (await cursor.hasNext()) {
             let item = await cursor.next();
@@ -34,8 +41,16 @@ async function check(startDate) {
     }
 }
 
-check(new Date("2017-06-28 00:00:00")).then({
+program
+    .version('0.0.1')
+    .option('--sourceuri [value]', '源数据库URL', '')
+    .option('--targeturi [value]', '被检测数据库URL', '')
+program.parse(process.argv);
 
-}).catch(function(err) {
+let startDate = moment();
+startDate.add(-60, 'minutes');
+let endDate = moment();
+endDate.add(-30, 'minutes');
+check(startDate, endDate, program.sourceuri, program.targeturi).then({}).catch(function(err) {
     console.log(err)
 })

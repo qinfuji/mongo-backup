@@ -135,7 +135,7 @@ ReplicaSetDB.prototype.getSecondaryNode = async function() {
         let configMembers = replSetConfig.config.members;
         let replSetStatus = await db.command({ replSetGetStatus: 1 });
         let stateMember = replSetStatus.members;
-        var replsetName = replSetConfig._id;
+        var replsetName = replSetConfig.config._id;
         let secondaryNode = null;
         let stateMemberMap = {};
         stateMember.forEach(function(member) {
