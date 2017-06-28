@@ -2,10 +2,10 @@
  * mongo 数据迁移
  */
 
-var program = require('commander');
-var { cmdExe } = require("./utils");
-var path = require("path");
-var mkdirp = require('mkdirp');
+const program = require('commander');
+const { cmdExe } = require("./utils");
+const path = require("path");
+const mkdirp = require('mkdirp');
 
 program
     .version('0.0.1')

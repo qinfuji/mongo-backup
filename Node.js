@@ -118,7 +118,7 @@ Node.prototype.incbackup = async function(backupInfo) {
     }
     let ns = ""
     if (backupInfo.db) {
-        ns += `{"ns": /^${backupInfo.db}/}`
+        ns += `{"ns": /${backupInfo.db}/}`
     }
     let query = `{ "ts": { "$gte": Timestamp( ${timestamp.getHighBits()},${timestamp.getLowBits()})}}`
     if (ns) {
