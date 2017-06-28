@@ -18,6 +18,8 @@ program
     .option('--db [value]', '恢复的数据库', '')
 program.parse(process.argv);
 
+console.log("------------------------------------------------------------------------");
+console.log("------------------------------------------------------------------------");
 
 if (!(program.backupdir && program.uri && program.mode && program.db)) {
     program.help()
