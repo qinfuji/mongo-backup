@@ -169,7 +169,13 @@ Node.prototype.incRestore = async function(restoreInfo) {
 
 
 Node.prototype.oplogTimestamp = async function() {
-    let db = await this.connect();
+    let url = "mongodb://"
+    if (this.username && this.password) {
+        url += this.username + ":" + this.password + "@"
+    }
+    url += (this.url + "/?replicaSet=" + this.replsetName);
+    console.log("oplogTimestamp connect to " + url);
+    let db = await MongoClient.connect(url);
     let localdb = await db.db("local")
     let oplog = await localdb.collection("oplog.rs");
     let lastLog = await oplog.find().sort({ $natural: -1 }).limit(1).toArray();
@@ -177,18 +183,4 @@ Node.prototype.oplogTimestamp = async function() {
     db.close();
     return timestamp;
 }
-
-Node.prototype.connect = async function() {
-    if (!this.db) {
-        let url = "mongodb://"
-        if (this.username && this.password) {
-            url += this.username + ":" + this.password + "@"
-        }
-        url += (this.url + "/?replicaSet=" + this.replsetName);
-        console.log("Node connect to " + url);
-        this.db = await MongoClient.connect(url);
-    }
-    return this.db;
-}
-
 module.exports = Node
