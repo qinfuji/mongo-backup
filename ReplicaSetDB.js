@@ -135,7 +135,7 @@ ReplicaSetDB.prototype.getSecondaryNode = async function() {
         let configMembers = replSetConfig.config.members;
         let replSetStatus = await db.command({ replSetGetStatus: 1 });
         let stateMember = replSetStatus.members;
-
+        var replsetName = replSetConfig._id;
         let secondaryNode = null;
         let stateMemberMap = {};
         stateMember.forEach(function(member) {
@@ -151,9 +151,9 @@ ReplicaSetDB.prototype.getSecondaryNode = async function() {
             if (stateMemberMap[_id] && stateMemberMap[_id].stateStr != "PRIMARY") { //不是关键节点
                 let node = null;
                 if (uriInfo.username) {
-                    node = new Node(host, uriInfo.username, uriInfo.password);
+                    node = new Node(host, replsetName, uriInfo.username, uriInfo.password);
                 } else {
-                    node = new Node(host, null, null);
+                    node = new Node(host, replsetName, null, null, );
                 }
                 if (hidden == true && priority == 0) { //找到一个hidden节点
                     secondaryNode = node;

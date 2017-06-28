@@ -15,8 +15,30 @@
 //     sdb.close()
 // })
 
-const ShardingDB = require("./ShardingDB")
-let sdb = new ShardingDB("mongodb://10.90.13.157:27017,10.90.13.158:27017")
+// const ShardingDB = require("./ShardingDB")
+// let sdb = new ShardingDB("mongodb://10.90.13.157:27017,10.90.13.158:27017")
+
+
+const MongoClient = require('mongodb').MongoClient;
+// MongoClient.connect("mongodb://10.90.9.25:27017/?replicaSet=fhhshard1", function(err, db) {
+//     //console.log(err, db)
+//     let localdb = db.db("local")
+//     let oplogs = localdb.collection("oplog.rs")
+//     plog.find().sort({ $natural: -1 }).limit(1).toArray();
+// });
+
+(async function() {
+    let db = await MongoClient.connect("mongodb://fhh_super_p:fhh_super_p@10.90.13.160:27017/?replicaSet=fhhReplSet");
+    let localdb = await db.db("local")
+    let oplog = await localdb.collection("oplog.rs");
+    let lastLog = await oplog.find().sort({ $natural: -1 }).limit(1).toArray();
+    let timestamp = lastLog[0].ts; //最后的时间
+    console.log(timestamp);
+    await new Promise(function() {});
+})();
+
+
+
 
 // sdb.getSecondaryNode().then(function(result) {
 //     console.log(result)
@@ -27,17 +49,17 @@ let sdb = new ShardingDB("mongodb://10.90.13.157:27017,10.90.13.158:27017")
 // })
 
 
-sdb.fullbackup(__dirname).then(function(result) {
-    console.log("fullbackup finish ", result)
-}).catch(function(err) {
-    console.log("fullbackup error ", err.stack)
-})
+// sdb.fullbackup(__dirname).then(function(result) {
+//     console.log("fullbackup finish ", result)
+// }).catch(function(err) {
+//     console.log("fullbackup error ", err.stack)
+// })
 
-sdb.incbackup(__dirname).then(function(result) {
-    console.log("incbackup finish ", result)
-}).catch(function(err) {
-    console.log("incbackup error ", err.stack)
-})
+// sdb.incbackup(__dirname).then(function(result) {
+//     console.log("incbackup finish ", result)
+// }).catch(function(err) {
+//     console.log("incbackup error ", err.stack)
+// })
 
 // sdb.getReplSetDB().then((result) => {
 //     if (result && result.length) {

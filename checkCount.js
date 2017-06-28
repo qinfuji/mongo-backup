@@ -10,10 +10,9 @@ async function check(startDate) {
     let newDB = await MongoClient.connect("mongodb://fhh_rw_p:fhh_rw_p@10.90.13.159:27017,10.90.13.160:27017,10.90.13.161:27017/fhh?replicaSet=fhhReplSet");
     try {
 
-
         let oArtialeCol = oldDB.collection("article");
         let nArtialeCol = newDB.collection("article");
-        let cursor = oArtialeCol.find({ $and: [{ importTime: { $gte: new Date("2017-06-28 13:00:00") } }, { importTime: { $lt: new Date("2017-06-28 23:59:59") } }] }, { importTime: -1, eArticleId: 1, title: 1 })
+        let cursor = oArtialeCol.find({ $and: [{ importTime: { $gte: new Date("2017-06-28 16:30:00") } }, { importTime: { $lte: new Date("2017-06-28 17:00:00") } }] }, { importTime: 1 })
         let count = 0;
         while (await cursor.hasNext()) {
             let item = await cursor.next();

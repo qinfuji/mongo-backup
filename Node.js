@@ -12,9 +12,10 @@ const { exec } = require('child_process');
  * @master 节点的master地址
  * 
  */
-function Node(url, username, password) {
+function Node(url, replsetName, username, password) {
     this.url = url;
-    this.username = username
+    this.username = username;
+    this.replsetName = replsetName;
     this.password = password
 };
 
@@ -183,7 +184,8 @@ Node.prototype.connect = async function() {
         if (this.username && this.password) {
             url += this.username + ":" + this.password + "@"
         }
-        url += this.master;
+        url += (this.url + "/?replicaSet=" + this.replsetName);
+        console.log("Node connect to " + url);
         this.db = await MongoClient.connect(url);
     }
     return this.db;
