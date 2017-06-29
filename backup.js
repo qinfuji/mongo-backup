@@ -40,27 +40,28 @@ async function backup({ backupdir, db }) {
                 backupdir: backupdir,
                 backupdb: db
             });
-        }
-        let incRetInfos = await backupDB.incbackup({
-            backupdir: backupdir,
-            backupdb: db
-        });
-        //console.log("---------------->", incRetInfos);
-        //重新整理路径
-        if (!Array.isArray(incRetInfos)) {
-            //如果是多个增量文件，并且将增量文件移动到指定目录
-            incRetInfos = [incRetInfos];
-        }
-        incRetInfos.forEach(function(incRetInfo) {
-            let finishDir = incRetInfo.finishDir
-            let baseName = path.basename(finishDir);
-            let toDir = path.join(backupdir, "incfinish");
-            mkdirp.sync(toDir);
-            let cmd_line = `cp  ${finishDir}/local/oplog.rs.bson ${toDir}/oplog.rs_${baseName}.bson`;
-            cmdExe(cmd_line).then(function() {}).catch(function(err) {
-                console.log(err, err.stack)
+        } else if (program.mode == 'inc') {
+            let incRetInfos = await backupDB.incbackup({
+                backupdir: backupdir,
+                backupdb: db
+            });
+            //console.log("---------------->", incRetInfos);
+            //重新整理路径
+            if (!Array.isArray(incRetInfos)) {
+                //如果是多个增量文件，并且将增量文件移动到指定目录
+                incRetInfos = [incRetInfos];
+            }
+            incRetInfos.forEach(function(incRetInfo) {
+                let finishDir = incRetInfo.finishDir
+                let baseName = path.basename(finishDir);
+                let toDir = path.join(backupdir, "incfinish");
+                mkdirp.sync(toDir);
+                let cmd_line = `cp  ${finishDir}/local/oplog.rs.bson ${toDir}/oplog.rs_${baseName}.bson`;
+                cmdExe(cmd_line).then(function() {}).catch(function(err) {
+                    console.log(err, err.stack)
+                })
             })
-        })
+        }
         return;
     } catch (err) {
         console.log(err, err.stack);
