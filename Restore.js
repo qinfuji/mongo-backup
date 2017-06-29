@@ -42,9 +42,8 @@ async function restore({ backdir, restoreDB }) {
         let fullDir = path.join(backdir, "full");
         mkdirp.sync(fullDir);
         let ret = cmdExe(`mv ${fullDir} ${fullDir}_${moment().format("YYYYMMDDhhmmss")}`);
-        mkdirp.sync(outputDir)
-        let fullbackupDir = path.join(backdir, "full")
-        let dirs = await fileUtils.findChildDir(fullbackupDir);
+        mkdirp.sync(fullDir);
+        let dirs = await fileUtils.findChildDir(fullDir);
 
         if (!dirs || !dirs.length) {
             throw new Error("没有需要处理的数据")
