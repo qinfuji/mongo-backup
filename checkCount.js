@@ -7,8 +7,10 @@ const ObjectID = require('mongodb').ObjectID;
 const moment = require("moment");
 const program = require('commander');
 
-//mongodb://xxxx/fhh
-//mongodb://xxxx/fhh?replicaSet=fhhReplSet
+console.log("------------------------------------------------------------------------");
+console.log("------------------------------------------------------------------------");
+
+
 /**
  * 检测文章数据数量
  */

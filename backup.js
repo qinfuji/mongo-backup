@@ -7,6 +7,10 @@ const { cmdExe } = require("./utils");
 const path = require("path");
 const mkdirp = require('mkdirp');
 
+
+console.log("------------------------------------------------------------------------");
+console.log("------------------------------------------------------------------------");
+
 program
     .version('0.0.1')
     .option('--deploy [value]', '目标数据库模式，replSet|sharding', '')
