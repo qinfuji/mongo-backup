@@ -41,8 +41,6 @@ async function restore({ backdir, restoreDB }) {
         //让后再restore oplog
         let fullDir = path.join(backdir, "full");
         mkdirp.sync(fullDir);
-        let ret = cmdExe(`mv ${fullDir} ${fullDir}_${moment().format("YYYYMMDDhhmmss")}`);
-        mkdirp.sync(fullDir);
         let dirs = await fileUtils.findChildDir(fullDir);
 
         if (!dirs || !dirs.length) {

@@ -70,7 +70,7 @@ ReplicaSetDB.prototype.incbackup = async function({ backupdir, backupdb }) {
         if (!lastTime) {
             throw new Error("no oplog position")
         }
-        let lastTimestamp = new Timestamp(lastTime[1] - (5 * 60), lastTime[0]); //向前取5分钟的数据，防止数据丢失
+        let lastTimestamp = new Timestamp(lastTime[1], lastTime[0] - (5 * 60)); //向前取5分钟的数据，防止数据丢失 , 高位是秒，低位是增长的时间
         let lockRet = await secondaryNode.fsyncLock(); //枷锁数据
         let currentOplogTime = await secondaryNode.oplogTimestamp(); //当前数据节点的最后log时间
         if (!lastTime) {
