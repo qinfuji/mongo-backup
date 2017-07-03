@@ -22,7 +22,7 @@ async function check(startDate, endDate, sourceDBUrl, targetDBUrl) {
     try {
         let oArtialeCol = oldDB.collection("article");
         let nArtialeCol = newDB.collection("article");
-        let cursor = oArtialeCol.find({ $and: [{ importTime: { $gte: startDate.toDate() } }, { importTime: { $lte: endDate.toDate() } }] }, { importTime: 1 })
+        let cursor = oArtialeCol.find({ $and: [{ importTime: { $gte: startDate.toDate() } }, { importTime: { $lte: endDate.toDate() } }] } /*, { importTime: 1 }*/ )
         let count = 0;
         let diffData = [];
         while (await cursor.hasNext()) {
