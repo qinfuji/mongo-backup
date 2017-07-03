@@ -24,14 +24,23 @@ async function check(startDate, endDate, sourceDBUrl, targetDBUrl) {
         let nArtialeCol = newDB.collection("article");
         let cursor = oArtialeCol.find({ $and: [{ importTime: { $gte: startDate.toDate() } }, { importTime: { $lte: endDate.toDate() } }] }, { importTime: 1 })
         let count = 0;
+        let diffData = [];
         while (await cursor.hasNext()) {
             let item = await cursor.next();
             let nItem = await nArtialeCol.findOne({ _id: item._id })
             if (!nItem) {
                 console.log(++count, item.importTime, item._id);
+            } else {
+                //验证数据一致性
+                let str1 = JSON.stringify(item);
+                let str2 = JSON.stringify(nItem);
+                if (str1 != str2) {
+                    diffData.push(nItem);
+                }
             }
             hasNext = await cursor.hasNext();
         }
+        console.log(diffData);
         oldDB.close();
         newDB.close();
         console.log("ok")
