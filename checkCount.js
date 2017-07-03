@@ -35,6 +35,8 @@ async function check(startDate, endDate, sourceDBUrl, targetDBUrl) {
                 let str1 = JSON.stringify(item);
                 let str2 = JSON.stringify(nItem);
                 if (str1 != str2) {
+                    console.log(str1)
+                    console.log(str2);
                     diffData.push(nItem);
                 }
             }
