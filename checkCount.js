@@ -57,12 +57,24 @@ program
     .version('0.0.1')
     .option('--sourceuri [value]', '源数据库URL', '')
     .option('--targeturi [value]', '被检测数据库URL', '')
+    .option('--startDate [value]', '开始检查时间')
+    .option('--endDate [value]', '开始检查时间')
 program.parse(process.argv);
 
 let startDate = moment();
-startDate.add(-60, 'minutes');
+if (program.startDate) {
+    startDate = moment(program.startDate);
+} else {
+    startDate.add(-60, 'minutes');
+}
 let endDate = moment();
-endDate.add(-30, 'minutes');
+if (program.endDate) {
+    startDate = moment(program.startDate);
+} else {
+    endDate.add(-30, 'minutes');
+}
+console.log("startDate", startDate.format("YYYY-MM-DD hh:mm:ss"));
+console.log("endDate", endDate.format("YYYY-MM-DD hh:mm:ss"));
 check(startDate, endDate, program.sourceuri, program.targeturi).then({}).catch(function(err) {
     console.log(err)
 })
