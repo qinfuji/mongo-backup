@@ -40,7 +40,8 @@ async function check(startDate, endDate, sourceDBUrl, targetDBUrl) {
             }
             hasNext = await cursor.hasNext();
         }
-        console.log(diffData);
+        console.log("diffData", diffData);
+
         oldDB.close();
         newDB.close();
         console.log("ok")
