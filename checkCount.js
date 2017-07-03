@@ -69,7 +69,7 @@ if (program.startDate) {
 }
 let endDate = moment();
 if (program.endDate) {
-    startDate = moment(program.startDate);
+    endDate = moment(program.endDate);
 } else {
     endDate.add(-30, 'minutes');
 }
