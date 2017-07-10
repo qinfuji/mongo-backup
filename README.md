@@ -1,6 +1,34 @@
-该项目，只负责将sharding 或 replicaSet 数据 备份到 replicaSet 下
+#### 该项目，只负责将sharding 或 replicaSet 数据 备份到 replicaSet 下
 
-如果系统有安全认证，为简单起见，对复制集、 mongos 使用统一的用户进行备份
+     Restore.js
+        --mode  恢复方式 
+          inc 增量  
+          full 全量
+        --uri 备份文件需要恢复到的数据库地址，当前只支持replicaSet部署
+        --db  需要恢复的数据库
+        --backdir 需要恢复的数据文件的位置，也是backup.js文件的输出目录
+
+     backup.js
+        --deploy 备份数据库的部署方式
+          sharding 集群模式
+          replSet  复制集模式
+        --mode   备份方式
+          inc    增量备份
+          full   全量备份
+        --backupdir 备份输出目录
+        --uri    待备份的数据库地址
+        --db     待备份的数据库
+
+     
+     备份输出目录结构
+
+        backupdir
+           |-- dbname   
+              |--full  全量目录
+              |-—inc   增量目录
+              |--incfinish 增量完成后后将文件拷贝到该目录下，防止恢复与备份文件冲突  
+              |--*_status.json  备份的状态记录，每次备份(增量、全量)都需要修，增量备份使用该文件。
+                
 
 
 #### 首先得到sharding集群或replcaSet的Hide node或SECONDARY node
