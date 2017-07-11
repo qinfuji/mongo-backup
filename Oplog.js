@@ -30,7 +30,8 @@ module.exports.merge = function(outputFile, filenames) {
         let docsBuffer = contentBuffer.slice(bufIdx, retIdx);
         //console.log(docs[0])
         deserDocuments.push(docs[0]);
-        unDeserializeDoc[docs[0].h] = (docsBuffer);
+        //console.log(docs[0].h);
+        unDeserializeDoc[docs[0].h.toString()] = (docsBuffer);
         bufIdx = retIdx;
     }
 
@@ -43,7 +44,7 @@ module.exports.merge = function(outputFile, filenames) {
     let rets = [];
     deserDocuments.forEach(function(doc) {
         //let b = bson.serialize(doc);
-        let b = unDeserializeDoc[doc.h];
+        let b = unDeserializeDoc[doc.h.toString()];
         rets.push(b);
     });
     console.log(rets.length);
