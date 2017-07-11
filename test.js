@@ -19,7 +19,7 @@
 // let sdb = new ShardingDB("mongodb://10.90.13.157:27017,10.90.13.158:27017")
 
 
-const MongoClient = require('mongodb').MongoClient;
+//const MongoClient = require('mongodb').MongoClient;
 // MongoClient.connect("mongodb://10.90.9.25:27017/?replicaSet=fhhshard1", function(err, db) {
 //     //console.log(err, db)
 //     let localdb = db.db("local")
@@ -27,15 +27,15 @@ const MongoClient = require('mongodb').MongoClient;
 //     plog.find().sort({ $natural: -1 }).limit(1).toArray();
 // });
 
-(async function() {
-    let db = await MongoClient.connect("mongodb://fhh_super_p:fhh_super_p@10.90.13.160:27017/?replicaSet=fhhReplSet");
-    let localdb = await db.db("local")
-    let oplog = await localdb.collection("oplog.rs");
-    let lastLog = await oplog.find().sort({ $natural: -1 }).limit(1).toArray();
-    let timestamp = lastLog[0].ts; //最后的时间
-    console.log(timestamp);
-    await new Promise(function() {});
-})();
+// (async function() {
+//     let db = await MongoClient.connect("mongodb://fhh_super_p:fhh_super_p@10.90.13.160:27017/?replicaSet=fhhReplSet");
+//     let localdb = await db.db("local")
+//     let oplog = await localdb.collection("oplog.rs");
+//     let lastLog = await oplog.find().sort({ $natural: -1 }).limit(1).toArray();
+//     let timestamp = lastLog[0].ts; //最后的时间
+//     console.log(timestamp);
+//     await new Promise(function() {});
+// })();
 
 
 
@@ -157,6 +157,6 @@ const MongoClient = require('mongodb').MongoClient;
 // var re = require("c:\\timestamp.json")
 // console.log(re);
 
-// const oplogs = require("./Oplog");
-// const path = require("path")
-// oplogs.merge(path.join(__dirname, "oplogs/oplog.rs.bson"), path.join(__dirname, "oplogs/oplog.rs_1.bson"))
+const oplogs = require("./Oplog");
+const path = require("path")
+oplogs.merge(path.join(__dirname, "oplogfiles/out_oplog.rs.bson"), [path.join(__dirname, "oplogfiles/oplog.rs_1.bson"), path.join(__dirname, "oplogfiles/oplog.rs.bson")])

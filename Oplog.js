@@ -23,10 +23,14 @@ module.exports.merge = function(outputFile, filenames) {
     const docCount = 1;
     let docIdx = 0;
     let deserDocuments = [];
+    let unDeserializeDoc = {};
     while (bufIdx < contentBuffer.length) {
         let docs = []
         let retIdx = bson.deserializeStream(contentBuffer, bufIdx, docCount, docs, docIdx);
+        let docsBuffer = contentBuffer.slice(bufIdx, retIdx);
+        //console.log(docs[0])
         deserDocuments.push(docs[0]);
+        unDeserializeDoc[docs[0].h] = (docsBuffer);
         bufIdx = retIdx;
     }
 
@@ -38,12 +42,12 @@ module.exports.merge = function(outputFile, filenames) {
 
     let rets = [];
     deserDocuments.forEach(function(doc) {
-        let b = bson.serialize(doc);
+        //let b = bson.serialize(doc);
+        let b = unDeserializeDoc[doc.h];
         rets.push(b);
     });
     console.log(rets.length);
     let allbuff = Buffer.concat(rets);
-    //let outputFile = path.join(output, "./oplogs.bson");
     fs.writeFileSync(outputFile, allbuff);
     return outputFile;
 }
