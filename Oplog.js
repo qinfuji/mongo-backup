@@ -77,7 +77,7 @@ module.exports.vailde = function(filename) {
             if (ret >= 1) {
                 throw new Error("oplog time error");
             }
-            curDoc = curDoc;
+            lastDoc = curDoc;
         }
         bufIdx = retIdx;
     }
