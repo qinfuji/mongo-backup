@@ -187,6 +187,7 @@ const fs = require("fs")
 const path = require("path");
 const BSON = require('bson');
 const errids = require("./errids").ids;
+const Timestamp = require('mongodb').Timestamp;
 var bson = new BSON();
 
 let contentBuffer = fs.readFileSync(path.join(__dirname, "oplogfiles", "oplog.bson"));
