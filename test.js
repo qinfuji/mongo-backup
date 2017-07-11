@@ -199,9 +199,21 @@ while (bufIdx < contentBuffer.length) {
     let docs = []
     let retIdx = bson.deserializeStream(contentBuffer, bufIdx, docCount, docs, docIdx);
     let curDoc = docs[0];
-    let op = curDoc.op;
-    //if (op == 'i' && curDoc.ns == 'fhh.article' && errids[curDoc.o.eArticleId]) { //新增操作
-    console.log(curDoc.ts);
-    //}
+    // let op = curDoc.op;
+    // //if (op == 'i' && curDoc.ns == 'fhh.article' && errids[curDoc.o.eArticleId]) { //新增操作
+    // console.log(curDoc.ts);
+    // //}
+
+    if (!lastDoc) {
+        lastDoc = curDoc;
+    } else {
+        let l = new Timestamp(lastDoc.ts.low_, lastDoc.ts.high_);
+        let c = new Timestamp(curDoc.ts.low_, curDoc.ts.high_);
+        let ret = l.compare(c)
+        if (ret >= 1) {
+            throw new Error("oplog time error");
+        }
+        lastDoc = curDoc;
+    }
     bufIdx = retIdx;
 }
