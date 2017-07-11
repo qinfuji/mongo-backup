@@ -157,6 +157,51 @@
 // var re = require("c:\\timestamp.json")
 // console.log(re);
 
-const oplogs = require("./Oplog");
-const path = require("path")
-oplogs.merge(path.join(__dirname, "oplogfiles/out_oplog.rs.bson"), [path.join(__dirname, "oplogfiles/oplog.rs_1.bson"), path.join(__dirname, "oplogfiles/oplog.rs.bson")])
+// const oplogs = require("./Oplog");
+// const path = require("path")
+// oplogs.merge(path.join(__dirname, "oplogfiles/out_oplog.rs.bson"), [path.join(__dirname, "oplogfiles/oplog.rs_1.bson"), path.join(__dirname, "oplogfiles/oplog.rs.bson")])
+
+// const MongoClient = require('mongodb').MongoClient;
+
+// (async function start() {
+
+//     let db = await MongoClient.connect("mongodb://fhh_rw_p:fhh_rw_p@10.90.13.159:27017,10.90.13.160:27017,10.90.13.161:27017/fhh?replicaSet=fhhReplSet")
+//     let articleColl = db.collection("article");
+//     let docs = await articleColl.find({ importTime: { $gt: new Date("2017-07-11 11:05:00") }, eArticleId: { $type: 16 } });
+//     //console.log(docs)
+//     //let hasNext = await docs.hasNext();
+//     //console.log(hasNext);
+//     let count = 0;
+//     console.log("{")
+//     while (await docs.hasNext()) {
+//         let doc = await docs.next();
+//         console.log("'" + doc.eArticleId + "':true,");
+
+//     }
+//     console.log("}")
+//     db.close();
+// })()
+
+
+const fs = require("fs")
+const path = require("path");
+const BSON = require('bson');
+const errids = require("./errids").ids;
+var bson = new BSON();
+
+let contentBuffer = fs.readFileSync(path.join(__dirname, "oplogfiles", "oplog.bson"));
+
+let bufIdx = 0;
+const docCount = 1;
+let docIdx = 0;
+let lastDoc = null;
+while (bufIdx < contentBuffer.length) {
+    let docs = []
+    let retIdx = bson.deserializeStream(contentBuffer, bufIdx, docCount, docs, docIdx);
+    let curDoc = docs[0];
+    let op = curDoc.op;
+    //if (op == 'i' && curDoc.ns == 'fhh.article' && errids[curDoc.o.eArticleId]) { //新增操作
+    console.log(curDoc.ts);
+    //}
+    bufIdx = retIdx;
+}
