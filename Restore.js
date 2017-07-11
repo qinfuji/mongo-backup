@@ -19,6 +19,7 @@ program
 program.parse(process.argv);
 
 console.log("------------------------------------------------------------------------");
+console.log("-------------------" + new Date() + "------------------------");
 console.log("------------------------------------------------------------------------");
 
 if (!(program.backupdir && program.uri && program.mode && program.db)) {
